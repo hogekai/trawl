@@ -11,9 +11,7 @@ function extractSeatbid(json: unknown): Seatbid[] | undefined {
 	// Openrtb wrapper: { openrtb: { response: { seatbid } } }
 	if ("openrtb" in obj) {
 		const openrtb = obj.openrtb as Record<string, unknown> | undefined
-		const response = openrtb?.response as
-			| Record<string, unknown>
-			| undefined
+		const response = openrtb?.response as Record<string, unknown> | undefined
 		return response?.seatbid as Seatbid[] | undefined
 	}
 	// Bare Response: { seatbid }

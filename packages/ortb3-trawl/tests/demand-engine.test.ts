@@ -1,6 +1,6 @@
-import { describe, it, expect, vi } from "vitest"
+import type { Item, Request } from "iab-openrtb/v30"
+import { describe, expect, it, vi } from "vitest"
 import { buildDemandRequest } from "../src/demand-engine.js"
-import type { Request, Item } from "iab-openrtb/v30"
 import type { DemandAdapter } from "../src/types.js"
 
 function makeReq(overrides?: Partial<Request>): Request {
@@ -163,8 +163,8 @@ describe("buildDemandRequest", () => {
 			const result = buildDemandRequest(makeReq(), adapter)
 			if (!result.ok || "skipped" in result) throw new Error("unexpected")
 			expect(result.value.request.item).toHaveLength(1)
-			expect(result.value.request.item[0]!.id).toBe("imp-1")
-			expect(result.value.request.item[0]!.ext).toEqual({ x: 1 })
+			expect(result.value.request.item[0]?.id).toBe("imp-1")
+			expect(result.value.request.item[0]?.ext).toEqual({ x: 1 })
 		})
 
 		it("returns skipped when all items are null", () => {
@@ -194,7 +194,7 @@ describe("buildDemandRequest", () => {
 			})
 			const result = buildDemandRequest(template, adapter)
 			if (!result.ok || "skipped" in result) throw new Error("unexpected")
-			expect(result.value.request.item[0]!.ext).toEqual({
+			expect(result.value.request.item[0]?.ext).toEqual({
 				existing: true,
 				added: true,
 			})

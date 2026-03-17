@@ -1,5 +1,5 @@
-import { describe, it, expect } from "vitest"
-import { imp, banner, video, native } from "../src/index.js"
+import { describe, expect, it } from "vitest"
+import { banner, imp, native, video } from "../src/index.js"
 
 describe("imp()", () => {
 	it("creates an Item with id and spec", () => {

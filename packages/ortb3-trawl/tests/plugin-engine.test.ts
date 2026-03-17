@@ -1,12 +1,12 @@
-import { describe, it, expect, vi } from "vitest"
+import type { Bid, Request } from "iab-openrtb/v30"
+import { describe, expect, it, vi } from "vitest"
 import {
-	runGlobalRequestPlugins,
 	runDemandRequestPlugins,
 	runDemandResponsePlugins,
+	runGlobalRequestPlugins,
 	runGlobalResponsePlugins,
 } from "../src/plugin-engine.js"
-import type { Request, Bid } from "iab-openrtb/v30"
-import type { Plugin, DemandPlugin } from "../src/types.js"
+import type { DemandPlugin, Plugin } from "../src/types.js"
 
 function makeReq(overrides?: Partial<Request>): Request {
 	return {
@@ -120,10 +120,10 @@ describe("runGlobalRequestPlugins", () => {
 		)
 		expect(request.ext).toEqual({ good: true, afterBad: true })
 		expect(errors).toHaveLength(1)
-		expect(errors[0]!.demandName).toBe("plugin:bad")
-		expect(errors[0]!.type).toBe("invalid")
-		expect(errors[0]!.message).toBe("plugin failed")
-		expect(errors[0]!.requestId).toBe("req-1")
+		expect(errors[0]?.demandName).toBe("plugin:bad")
+		expect(errors[0]?.type).toBe("invalid")
+		expect(errors[0]?.message).toBe("plugin failed")
+		expect(errors[0]?.requestId).toBe("req-1")
 	})
 
 	it("handles non-Error throws", async () => {
@@ -140,14 +140,26 @@ describe("runGlobalRequestPlugins", () => {
 			makeReq(),
 			undefined,
 		)
-		expect(errors[0]!.message).toBe("string error")
+		expect(errors[0]?.message).toBe("string error")
 	})
 
 	it("skips remaining plugins when signal is aborted", async () => {
 		const ran: string[] = []
 		const plugins: Plugin[] = [
-			{ name: "p1", onRequest: (req) => { ran.push("p1"); return req } },
-			{ name: "p2", onRequest: (req) => { ran.push("p2"); return req } },
+			{
+				name: "p1",
+				onRequest: (req) => {
+					ran.push("p1")
+					return req
+				},
+			},
+			{
+				name: "p2",
+				onRequest: (req) => {
+					ran.push("p2")
+					return req
+				},
+			},
 		]
 		const { errors } = await runGlobalRequestPlugins(
 			plugins,
@@ -172,7 +184,7 @@ describe("runGlobalRequestPlugins", () => {
 		]
 		await runGlobalRequestPlugins(plugins, makeReq(), undefined)
 		expect(receivedSignals).toHaveLength(1)
-		expect(receivedSignals[0]!.aborted).toBe(false)
+		expect(receivedSignals[0]?.aborted).toBe(false)
 	})
 
 	it("returns initial request when plugins array is empty", async () => {
@@ -189,8 +201,18 @@ describe("runGlobalRequestPlugins", () => {
 	it("returns initial request with N errors when all throw", async () => {
 		const req = makeReq()
 		const plugins: Plugin[] = [
-			{ name: "bad1", onRequest: () => { throw new Error("e1") } },
-			{ name: "bad2", onRequest: () => { throw new Error("e2") } },
+			{
+				name: "bad1",
+				onRequest: () => {
+					throw new Error("e1")
+				},
+			},
+			{
+				name: "bad2",
+				onRequest: () => {
+					throw new Error("e2")
+				},
+			},
 		]
 		const { request, errors } = await runGlobalRequestPlugins(
 			plugins,
@@ -244,13 +266,19 @@ describe("runDemandRequestPlugins", () => {
 			signal,
 			"demand-a",
 		)
-		expect(errors[0]!.demandName).toBe("demand-a")
+		expect(errors[0]?.demandName).toBe("demand-a")
 	})
 
 	it("skips all plugins when signal is pre-aborted", async () => {
 		const ran: string[] = []
 		const plugins: DemandPlugin[] = [
-			{ name: "p1", onRequest: (req) => { ran.push("p1"); return req } },
+			{
+				name: "p1",
+				onRequest: (req) => {
+					ran.push("p1")
+					return req
+				},
+			},
 		]
 		const { request } = await runDemandRequestPlugins(
 			plugins,
@@ -300,10 +328,7 @@ describe("runDemandResponsePlugins", () => {
 		const plugins: DemandPlugin[] = [
 			{
 				name: "dp1",
-				onResponse: (bids) => [
-					...bids,
-					makeBid({ price: 2.0 }),
-				],
+				onResponse: (bids) => [...bids, makeBid({ price: 2.0 })],
 			},
 			{
 				name: "dp2",
@@ -319,7 +344,7 @@ describe("runDemandResponsePlugins", () => {
 		)
 		// dp1 adds a bid (price 2.0), dp2 filters price <= 1.0
 		expect(bids).toHaveLength(1)
-		expect(bids[0]!.price).toBe(2.0)
+		expect(bids[0]?.price).toBe(2.0)
 		expect(errors).toEqual([])
 	})
 
@@ -339,8 +364,8 @@ describe("runDemandResponsePlugins", () => {
 			"demand-b",
 			"req-42",
 		)
-		expect(errors[0]!.demandName).toBe("demand-b")
-		expect(errors[0]!.requestId).toBe("req-42")
+		expect(errors[0]?.demandName).toBe("demand-b")
+		expect(errors[0]?.requestId).toBe("req-42")
 	})
 
 	it("collects errors and continues with last successful bids", async () => {
@@ -368,14 +393,12 @@ describe("runDemandResponsePlugins", () => {
 			"req-1",
 		)
 		expect(bids).toHaveLength(1)
-		expect(bids[0]!.price).toBe(99)
+		expect(bids[0]?.price).toBe(99)
 		expect(errors).toHaveLength(1)
 	})
 
 	it("handles empty bids array", async () => {
-		const plugins: DemandPlugin[] = [
-			{ name: "p1", onResponse: (bids) => bids },
-		]
+		const plugins: DemandPlugin[] = [{ name: "p1", onResponse: (bids) => bids }]
 		const { bids } = await runDemandResponsePlugins(
 			plugins,
 			[],
@@ -418,7 +441,7 @@ describe("runGlobalResponsePlugins", () => {
 			"req-1",
 		)
 		expect(bids).toHaveLength(1)
-		expect(bids[0]!.price).toBe(2.0)
+		expect(bids[0]?.price).toBe(2.0)
 		expect(errors).toEqual([])
 	})
 
@@ -437,8 +460,8 @@ describe("runGlobalResponsePlugins", () => {
 			undefined,
 			"req-1",
 		)
-		expect(errors[0]!.demandName).toBe("plugin:crasher")
-		expect(errors[0]!.requestId).toBe("req-1")
+		expect(errors[0]?.demandName).toBe("plugin:crasher")
+		expect(errors[0]?.requestId).toBe("req-1")
 	})
 
 	it("preserves bid references between plugins (no cloning)", async () => {
@@ -455,7 +478,7 @@ describe("runGlobalResponsePlugins", () => {
 				name: "checker",
 				onResponse: (bids) => {
 					// same reference, mutation visible
-					expect(bids[0]!.ext).toEqual({ mutated: true })
+					expect(bids[0]?.ext).toEqual({ mutated: true })
 					return bids
 				},
 			},
@@ -500,6 +523,6 @@ describe("runGlobalResponsePlugins", () => {
 		)
 		expect(bids).toBe(input)
 		expect(errors).toHaveLength(1)
-		expect(errors[0]!.message).toBe("async fail")
+		expect(errors[0]?.message).toBe("async fail")
 	})
 })

@@ -1,4 +1,12 @@
 import type { Bid, Item, Request } from "iab-openrtb/v30"
+import { buildDemandRequest } from "./demand-engine.js"
+import { parseResponse } from "./parse-response.js"
+import {
+	runDemandRequestPlugins,
+	runDemandResponsePlugins,
+	runGlobalRequestPlugins,
+	runGlobalResponsePlugins,
+} from "./plugin-engine.js"
 import type {
 	AdSlots,
 	AdSlotsOptions,
@@ -11,14 +19,6 @@ import type {
 	Plugin,
 	TrawlBidExt,
 } from "./types.js"
-import { buildDemandRequest } from "./demand-engine.js"
-import { parseResponse } from "./parse-response.js"
-import {
-	runGlobalRequestPlugins,
-	runDemandRequestPlugins,
-	runDemandResponsePlugins,
-	runGlobalResponsePlugins,
-} from "./plugin-engine.js"
 
 interface DemandEntry {
 	adapter: DemandAdapter
@@ -32,7 +32,10 @@ interface DemandResult {
 	errors: DemandError[]
 }
 
-export function createAdSlots(items: Item[], options?: AdSlotsOptions): AdSlots {
+export function createAdSlots(
+	items: Item[],
+	options?: AdSlotsOptions,
+): AdSlots {
 	const ids = new Set<string>()
 	for (const item of items) {
 		if (ids.has(item.id)) {
@@ -105,10 +108,7 @@ export function createAdSlots(items: Item[], options?: AdSlotsOptions): AdSlots 
 				errors.push(...pluginResult.errors)
 
 				// c) Build the demand request
-				const buildResult = buildDemandRequest(
-					pluginResult.request,
-					adapter,
-				)
+				const buildResult = buildDemandRequest(pluginResult.request, adapter)
 				if (!buildResult.ok) {
 					errors.push(buildResult.error)
 					return { demandName, bids: [], plugins: demandPlugins, errors }
@@ -141,11 +141,7 @@ export function createAdSlots(items: Item[], options?: AdSlotsOptions): AdSlots 
 				}
 
 				// e) Parse response
-				const parseResult = await parseResponse(
-					response,
-					demandName,
-					requestId,
-				)
+				const parseResult = await parseResponse(response, demandName, requestId)
 				if (!parseResult.ok) {
 					errors.push(parseResult.error)
 					return { demandName, bids: [], plugins: demandPlugins, errors }
@@ -218,8 +214,9 @@ export function createAdSlots(items: Item[], options?: AdSlotsOptions): AdSlots 
 		// Rebuild Map from post-plugin bids using ext.trawl.demandName
 		const finalMap = new Map<string, Bid[]>()
 		for (const bid of globalRespResult.bids) {
-			const trawl = (bid.ext as Record<string, unknown> | undefined)
-				?.trawl as TrawlBidExt | undefined
+			const trawl = (bid.ext as Record<string, unknown> | undefined)?.trawl as
+				| TrawlBidExt
+				| undefined
 			const key = trawl?.demandName ?? "unknown"
 			const arr = finalMap.get(key)
 			if (arr) {

@@ -1,4 +1,4 @@
-import { describe, it, expect } from "vitest"
+import { describe, expect, it } from "vitest"
 import { parseResponse } from "../src/parse-response.js"
 
 function mockResponse(body: unknown, status = 200): Response {
@@ -37,11 +37,7 @@ describe("parseResponse", () => {
 	})
 
 	it("returns parse error for invalid JSON", async () => {
-		const result = await parseResponse(
-			mockJsonError(),
-			"demand-a",
-			"req-1",
-		)
+		const result = await parseResponse(mockJsonError(), "demand-a", "req-1")
 		expect(result.ok).toBe(false)
 		if (result.ok) throw new Error("unexpected")
 		expect(result.error.type).toBe("parse")
@@ -82,17 +78,13 @@ describe("parseResponse", () => {
 				},
 			],
 		}
-		const result = await parseResponse(
-			mockResponse(body),
-			"demand-a",
-			"req-1",
-		)
+		const result = await parseResponse(mockResponse(body), "demand-a", "req-1")
 		expect(result.ok).toBe(true)
 		if (!result.ok) throw new Error("unexpected")
 		expect(result.bids).toHaveLength(2)
-		expect(result.bids[0]!.item).toBe("imp-1")
-		expect(result.bids[0]!.price).toBe(1.5)
-		expect(result.bids[1]!.item).toBe("imp-2")
+		expect(result.bids[0]?.item).toBe("imp-1")
+		expect(result.bids[0]?.price).toBe(1.5)
+		expect(result.bids[1]?.item).toBe("imp-2")
 	})
 
 	it("extracts bids from Openrtb wrapper", async () => {
@@ -110,15 +102,11 @@ describe("parseResponse", () => {
 				},
 			},
 		}
-		const result = await parseResponse(
-			mockResponse(body),
-			"demand-a",
-			"req-1",
-		)
+		const result = await parseResponse(mockResponse(body), "demand-a", "req-1")
 		expect(result.ok).toBe(true)
 		if (!result.ok) throw new Error("unexpected")
 		expect(result.bids).toHaveLength(1)
-		expect(result.bids[0]!.price).toBe(3.0)
+		expect(result.bids[0]?.price).toBe(3.0)
 	})
 
 	it("flattens bids from multiple seatbids", async () => {
@@ -129,11 +117,7 @@ describe("parseResponse", () => {
 				{ bid: [{ item: "imp-2", price: 2.0 }] },
 			],
 		}
-		const result = await parseResponse(
-			mockResponse(body),
-			"demand-a",
-			"req-1",
-		)
+		const result = await parseResponse(mockResponse(body), "demand-a", "req-1")
 		expect(result.ok).toBe(true)
 		if (!result.ok) throw new Error("unexpected")
 		expect(result.bids).toHaveLength(2)
@@ -142,21 +126,17 @@ describe("parseResponse", () => {
 	it("annotates each bid with ext.trawl", async () => {
 		const body = {
 			id: "resp-1",
-			seatbid: [
-				{ bid: [{ item: "imp-1", price: 1.0 }] },
-			],
+			seatbid: [{ bid: [{ item: "imp-1", price: 1.0 }] }],
 		}
 		const before = Date.now()
-		const result = await parseResponse(
-			mockResponse(body),
-			"demand-x",
-			"req-42",
-		)
+		const result = await parseResponse(mockResponse(body), "demand-x", "req-42")
 		const after = Date.now()
 		expect(result.ok).toBe(true)
 		if (!result.ok) throw new Error("unexpected")
-		const trawl = (result.bids[0]!.ext as Record<string, unknown>)
-			.trawl as { demandName: string; fetchedAt: number }
+		const trawl = (result.bids[0]?.ext as Record<string, unknown>).trawl as {
+			demandName: string
+			fetchedAt: number
+		}
 		expect(trawl.demandName).toBe("demand-x")
 		expect(trawl.fetchedAt).toBeGreaterThanOrEqual(before)
 		expect(trawl.fetchedAt).toBeLessThanOrEqual(after)

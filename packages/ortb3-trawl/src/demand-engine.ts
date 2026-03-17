@@ -1,6 +1,6 @@
-import type { Request, Item } from "iab-openrtb/v30"
-import type { DemandAdapter, DemandError } from "./types.js"
+import type { Item, Request } from "iab-openrtb/v30"
 import { merge } from "./merge.js"
+import type { DemandAdapter, DemandError } from "./types.js"
 
 export interface DemandBuildResult {
 	request: Request
@@ -21,7 +21,6 @@ export function buildDemandRequest(
 	req: Request,
 	adapter: DemandAdapter,
 ): BuildResult {
-
 	Object.freeze(req.item)
 
 	// extensions
@@ -101,7 +100,6 @@ export function buildDemandRequest(
 	if (filteredItems.length === 0) {
 		return { ok: true, skipped: true, value: { reason: "all-items-null" } }
 	}
-
 	// replace frozen item array with filtered
 	;(req as { item: Item[] }).item = filteredItems
 

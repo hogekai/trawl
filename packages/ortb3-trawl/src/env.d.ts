@@ -21,7 +21,10 @@ declare global {
 
 	function structuredClone<T>(value: T): T
 
-	function fetch(input: string | URL, init?: Record<string, unknown>): Promise<Response>
+	function fetch(
+		input: string | URL,
+		init?: Record<string, unknown>,
+	): Promise<Response>
 
 	interface Response {
 		readonly ok: boolean

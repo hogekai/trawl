@@ -1,11 +1,11 @@
-import type { Request, Bid } from "iab-openrtb/v30"
-import type { Plugin, DemandPlugin, DemandError } from "./types.js"
+import type { Bid, Request } from "iab-openrtb/v30"
+import type { DemandError, DemandPlugin, Plugin } from "./types.js"
 
 async function runPluginsSequential<T>(
 	plugins: readonly { name: string }[],
-	getHook: (
-		plugin: { name: string },
-	) => ((value: T, signal: AbortSignal) => T | Promise<T>) | undefined,
+	getHook: (plugin: { name: string }) =>
+		| ((value: T, signal: AbortSignal) => T | Promise<T>)
+		| undefined,
 	initial: T,
 	signal: AbortSignal,
 	toError: (pluginName: string, err: unknown) => DemandError,

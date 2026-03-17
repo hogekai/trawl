@@ -1,5 +1,8 @@
 {
 	"$schema": "https://biomejs.dev/schemas/1.9.4/schema.json",
+	"files": {
+		"ignore": ["**/dist/**"]
+	},
 	"formatter": {
 		"indentStyle": "tab"
 	},
@@ -9,6 +12,14 @@
 		}
 	},
 	"linter": {
-		"enabled": true
+		"enabled": true,
+		"rules": {
+			"style": {
+				"noNonNullAssertion": "off"
+			},
+			"suspicious": {
+				"noImplicitAnyLet": "off"
+			}
+		}
 	}
 }

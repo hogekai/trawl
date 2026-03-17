@@ -1,6 +1,6 @@
-import { describe, it, expect } from "vitest"
-import { auction, byPrice, byDeal } from "../src/auction.js"
 import type { Bid } from "iab-openrtb/v30"
+import { describe, expect, it } from "vitest"
+import { auction, byDeal, byPrice } from "../src/auction.js"
 
 function bid(item: string, price: number, deal?: string): Bid {
 	return { item, price, ...(deal != null ? { deal } : {}) }
@@ -14,8 +14,8 @@ describe("auction", () => {
 		])
 		const winners = auction(bids, byPrice())
 		expect(winners.size).toBe(2)
-		expect(winners.get("imp-1")!.price).toBe(3.0)
-		expect(winners.get("imp-2")!.price).toBe(2.0)
+		expect(winners.get("imp-1")?.price).toBe(3.0)
+		expect(winners.get("imp-2")?.price).toBe(2.0)
 	})
 
 	it("omits impId when strategy returns null", () => {
@@ -48,7 +48,7 @@ describe("byPrice", () => {
 			bid("imp-1", 3.0),
 			bid("imp-1", 2.0),
 		])
-		expect(result!.price).toBe(3.0)
+		expect(result?.price).toBe(3.0)
 	})
 
 	it("selects first on tie", () => {
@@ -58,12 +58,12 @@ describe("byPrice", () => {
 		b1.id = "first"
 		b2.id = "second"
 		const result = strategy([b1, b2])
-		expect(result!.id).toBe("first")
+		expect(result?.id).toBe("first")
 	})
 
 	it("returns single bid", () => {
 		const result = byPrice()([bid("imp-1", 5.0)])
-		expect(result!.price).toBe(5.0)
+		expect(result?.price).toBe(5.0)
 	})
 
 	it("returns null for empty array", () => {
@@ -74,11 +74,11 @@ describe("byPrice", () => {
 describe("byDeal", () => {
 	it("prefers deal bid over higher-price non-deal", () => {
 		const result = byDeal()([
-			bid("imp-1", 5.0),        // no deal, higher price
-			bid("imp-1", 1.0, "d1"),  // deal, lower price
+			bid("imp-1", 5.0), // no deal, higher price
+			bid("imp-1", 1.0, "d1"), // deal, lower price
 		])
-		expect(result!.deal).toBe("d1")
-		expect(result!.price).toBe(1.0)
+		expect(result?.deal).toBe("d1")
+		expect(result?.price).toBe(1.0)
 	})
 
 	it("selects highest price among deal bids", () => {
@@ -87,16 +87,13 @@ describe("byDeal", () => {
 			bid("imp-1", 3.0, "d2"),
 			bid("imp-1", 10.0),
 		])
-		expect(result!.deal).toBe("d2")
-		expect(result!.price).toBe(3.0)
+		expect(result?.deal).toBe("d2")
+		expect(result?.price).toBe(3.0)
 	})
 
 	it("falls back to highest price when no deals", () => {
-		const result = byDeal()([
-			bid("imp-1", 1.0),
-			bid("imp-1", 4.0),
-		])
-		expect(result!.price).toBe(4.0)
+		const result = byDeal()([bid("imp-1", 1.0), bid("imp-1", 4.0)])
+		expect(result?.price).toBe(4.0)
 	})
 
 	it("returns null for empty array", () => {

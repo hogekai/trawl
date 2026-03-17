@@ -1,6 +1,10 @@
-import type { Item } from "iab-openrtb/v30"
-import type { AssetFormat, Placement, VideoPlacement } from "iab-adcom/placement"
 import type { NativeImageAssetType } from "iab-adcom/enum"
+import type {
+	AssetFormat,
+	Placement,
+	VideoPlacement,
+} from "iab-adcom/placement"
+import type { Item } from "iab-openrtb/v30"
 
 type PartialPlacement = Partial<Placement>
 
@@ -20,7 +24,9 @@ export function banner(...sizes: [number, number][]): PartialPlacement {
 	}
 }
 
-export function video(params: { mimes: string[] } & Record<string, unknown>): PartialPlacement {
+export function video(
+	params: { mimes: string[] } & Record<string, unknown>,
+): PartialPlacement {
 	const { mimes, ...rest } = params
 	return {
 		video: {
@@ -30,7 +36,10 @@ export function video(params: { mimes: string[] } & Record<string, unknown>): Pa
 	}
 }
 
-export function native(params: { title?: number; image?: number }): PartialPlacement {
+export function native(params: {
+	title?: number
+	image?: number
+}): PartialPlacement {
 	const assets: AssetFormat[] = []
 	let assetId = 0
 
@@ -38,7 +47,10 @@ export function native(params: { title?: number; image?: number }): PartialPlace
 		assets.push({ id: assetId++, title: { len: params.title } })
 	}
 	if (params.image != null) {
-		assets.push({ id: assetId++, img: { type: params.image as NativeImageAssetType } })
+		assets.push({
+			id: assetId++,
+			img: { type: params.image as NativeImageAssetType },
+		})
 	}
 
 	return {

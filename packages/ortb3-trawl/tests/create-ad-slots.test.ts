@@ -1,6 +1,6 @@
-import { describe, it, expect } from "vitest"
-import { createAdSlots, imp, banner, video } from "../src/index.js"
 import type { Item } from "iab-openrtb/v30"
+import { describe, expect, it } from "vitest"
+import { banner, createAdSlots, imp, video } from "../src/index.js"
 
 describe("createAdSlots", () => {
 	it("returns an AdSlots object with use, demand, and bid methods", () => {
@@ -29,10 +29,7 @@ describe("createAdSlots", () => {
 			id: "raw-1",
 			spec: { video: { mime: ["video/mp4"] } },
 		}
-		const ads = createAdSlots([
-			imp("header", banner([728, 90])),
-			rawItem,
-		])
+		const ads = createAdSlots([imp("header", banner([728, 90])), rawItem])
 		expect(ads).toHaveProperty("bid")
 	})
 

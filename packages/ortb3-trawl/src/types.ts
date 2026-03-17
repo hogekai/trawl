@@ -1,5 +1,5 @@
-import type { Item, Bid, Request } from "iab-openrtb/v30"
 import type { Placement } from "iab-adcom/placement"
+import type { Bid, Item, Request } from "iab-openrtb/v30"
 
 export type { Bid, Item, Request, Placement }
 
@@ -23,13 +23,19 @@ export interface BidResult {
 
 export interface Plugin {
 	name: string
-	onRequest?: (request: Request, signal: AbortSignal) => Request | Promise<Request>
+	onRequest?: (
+		request: Request,
+		signal: AbortSignal,
+	) => Request | Promise<Request>
 	onResponse?: (bids: Bid[], signal: AbortSignal) => Bid[] | Promise<Bid[]>
 }
 
 export interface DemandPlugin {
 	name: string
-	onRequest?: (request: Request, signal: AbortSignal) => Request | Promise<Request>
+	onRequest?: (
+		request: Request,
+		signal: AbortSignal,
+	) => Request | Promise<Request>
 	onResponse?: (bids: Bid[], signal: AbortSignal) => Bid[] | Promise<Bid[]>
 }
 
