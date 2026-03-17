@@ -205,6 +205,7 @@ export function createAdSlots(
 		const globalRespResult = await runGlobalResponsePlugins(
 			globalPlugins,
 			allBidsFlat,
+			allErrors,
 			pluginTimeout,
 			requestId,
 		)

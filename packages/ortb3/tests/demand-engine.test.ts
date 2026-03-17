@@ -293,12 +293,15 @@ describe("buildDemandRequest", () => {
 			expect(result.value.requestInit.method).toBe("POST")
 		})
 
-		it("body is JSON stringified request", () => {
+		it("body is JSON stringified Openrtb envelope wrapping request", () => {
 			const result = buildDemandRequest(makeReq(), makeAdapter())
 			if (!result.ok || "skipped" in result) throw new Error("unexpected")
 			const parsed = JSON.parse(result.value.requestInit.body)
-			expect(parsed.id).toBe("req-1")
-			expect(parsed.item).toHaveLength(2)
+			expect(parsed.ver).toBe("3.0")
+			expect(parsed.domainspec).toBe("adcom")
+			expect(parsed.domainver).toBe("1.0")
+			expect(parsed.request.id).toBe("req-1")
+			expect(parsed.request.item).toHaveLength(2)
 		})
 	})
 })

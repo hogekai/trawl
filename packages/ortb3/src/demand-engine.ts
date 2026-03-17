@@ -1,4 +1,4 @@
-import type { Item, Request } from "iab-openrtb/v30"
+import type { Item, Openrtb, Request } from "iab-openrtb/v30"
 import { merge } from "./merge.js"
 import type { DemandAdapter, DemandError } from "./types.js"
 
@@ -118,7 +118,13 @@ export function buildDemandRequest(
 	headers["Content-Type"] =
 		adapter.fetchOptions?.contentType ?? "application/json"
 
-	let body = JSON.stringify(req)
+	const envelope: Openrtb = {
+		ver: "3.0",
+		domainspec: "adcom",
+		domainver: "1.0",
+		request: req,
+	}
+	let body = JSON.stringify(envelope)
 	if (adapter.fetchOptions?.transform) {
 		body = adapter.fetchOptions.transform(body)
 	}

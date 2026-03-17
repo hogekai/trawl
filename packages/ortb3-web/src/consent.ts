@@ -17,12 +17,10 @@ export function consent(getTCData: GetTCData): Plugin {
 
 			request.context ??= {}
 			request.context.regs ??= {}
-			request.context.regs.ext ??= {}
-			request.context.regs.ext.gdpr = tcData.gdprApplies ? 1 : 0
+			request.context.regs.gdpr = tcData.gdprApplies ? 1 : 0
 
 			request.context.user ??= {}
-			request.context.user.ext ??= {}
-			request.context.user.ext.consent = tcData.tcString
+			request.context.user.consent = tcData.tcString
 
 			return request
 		},

@@ -101,13 +101,19 @@ export async function runDemandResponsePlugins(
 export async function runGlobalResponsePlugins(
 	plugins: readonly Plugin[],
 	bids: Bid[],
+	pipelineErrors: readonly DemandError[],
 	pluginTimeout: number | undefined,
 	requestId: string,
 ): Promise<{ bids: Bid[]; errors: DemandError[] }> {
 	const signal = makeSignal(pluginTimeout)
 	const { value, errors } = await runPluginsSequential(
 		plugins,
-		(p) => (p as Plugin).onResponse,
+		(p) => {
+			const hook = (p as Plugin).onResponse
+			if (!hook) return undefined
+			return (bids: Bid[], signal: AbortSignal) =>
+				hook(bids, pipelineErrors, signal)
+		},
 		bids,
 		signal,
 		(name, err) => formatError(requestId, `plugin:${name}`, err),

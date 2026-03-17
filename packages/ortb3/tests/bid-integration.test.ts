@@ -143,9 +143,9 @@ describe("bid() integration", () => {
 		await ads.bid()
 		expect(bodies).toHaveLength(2)
 		for (const body of bodies) {
-			expect((body as Record<string, unknown>).ext).toEqual({
-				globalTag: true,
-			})
+			const envelope = body as Record<string, unknown>
+			const request = envelope.request as Record<string, unknown>
+			expect(request.ext).toEqual({ globalTag: true })
 		}
 	})
 
@@ -177,8 +177,10 @@ describe("bid() integration", () => {
 		ads.demand({ name: "dsp-b", endpoint: "https://dsp-b.com/bid" })
 		await ads.bid()
 
-		const bodyA = bodies.get("https://dsp-a.com/bid") as Record<string, unknown>
-		const bodyB = bodies.get("https://dsp-b.com/bid") as Record<string, unknown>
+		const envelopeA = bodies.get("https://dsp-a.com/bid") as Record<string, unknown>
+		const envelopeB = bodies.get("https://dsp-b.com/bid") as Record<string, unknown>
+		const bodyA = envelopeA.request as Record<string, unknown>
+		const bodyB = envelopeB.request as Record<string, unknown>
 		expect(bodyA.ext).toEqual({ demandSpecific: true })
 		expect(bodyB.ext).toBeUndefined()
 	})
@@ -215,7 +217,7 @@ describe("bid() integration", () => {
 		})
 		ads.use({
 			name: "global-floor",
-			onResponse: (bids) => bids.filter((b) => b.price >= 1.0),
+			onResponse: (bids, _errors) => bids.filter((b) => b.price >= 1.0),
 		})
 		ads.demand({ name: "dsp-a", endpoint: "https://dsp-a.com/bid" })
 		ads.demand({ name: "dsp-b", endpoint: "https://dsp-b.com/bid" })

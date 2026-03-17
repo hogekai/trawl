@@ -87,19 +87,18 @@ describe("parseResponse", () => {
 		expect(result.bids[1]?.item).toBe("imp-2")
 	})
 
-	it("extracts bids from Openrtb wrapper", async () => {
+	it("extracts bids from Openrtb envelope", async () => {
 		const body = {
-			openrtb: {
-				ver: "3.0",
-				domainver: "1.0",
-				response: {
-					id: "resp-1",
-					seatbid: [
-						{
-							bid: [{ item: "imp-1", price: 3.0 }],
-						},
-					],
-				},
+			ver: "3.0",
+			domainspec: "adcom",
+			domainver: "1.0",
+			response: {
+				id: "resp-1",
+				seatbid: [
+					{
+						bid: [{ item: "imp-1", price: 3.0 }],
+					},
+				],
 			},
 		}
 		const result = await parseResponse(mockResponse(body), "demand-a", "req-1")

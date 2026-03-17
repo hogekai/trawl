@@ -437,6 +437,7 @@ describe("runGlobalResponsePlugins", () => {
 		const { bids, errors } = await runGlobalResponsePlugins(
 			plugins,
 			[makeBid({ price: 0.5 }), makeBid({ price: 2.0 })],
+			[],
 			undefined,
 			"req-1",
 		)
@@ -457,6 +458,7 @@ describe("runGlobalResponsePlugins", () => {
 		const { errors } = await runGlobalResponsePlugins(
 			plugins,
 			[makeBid()],
+			[],
 			undefined,
 			"req-1",
 		)
@@ -486,6 +488,7 @@ describe("runGlobalResponsePlugins", () => {
 		const { bids } = await runGlobalResponsePlugins(
 			plugins,
 			[bid],
+			[],
 			undefined,
 			"req-1",
 		)
@@ -499,6 +502,7 @@ describe("runGlobalResponsePlugins", () => {
 		const { bids } = await runGlobalResponsePlugins(
 			[],
 			input,
+			[],
 			undefined,
 			"req-1",
 		)
@@ -518,11 +522,41 @@ describe("runGlobalResponsePlugins", () => {
 		const { bids, errors } = await runGlobalResponsePlugins(
 			plugins,
 			input,
+			[],
 			undefined,
 			"req-1",
 		)
 		expect(bids).toBe(input)
 		expect(errors).toHaveLength(1)
 		expect(errors[0]?.message).toBe("async fail")
+	})
+
+	it("passes pipelineErrors to plugin onResponse", async () => {
+		const pipelineErrors = [
+			{
+				requestId: "req-1",
+				demandName: "dsp-a",
+				type: "timeout" as const,
+				message: "timed out",
+			},
+		]
+		let receivedErrors: unknown
+		const plugins: Plugin[] = [
+			{
+				name: "monitor",
+				onResponse: (bids, errors) => {
+					receivedErrors = errors
+					return bids
+				},
+			},
+		]
+		await runGlobalResponsePlugins(
+			plugins,
+			[makeBid()],
+			pipelineErrors,
+			undefined,
+			"req-1",
+		)
+		expect(receivedErrors).toBe(pipelineErrors)
 	})
 })

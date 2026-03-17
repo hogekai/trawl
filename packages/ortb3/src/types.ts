@@ -27,7 +27,7 @@ export interface Plugin {
 		request: Request,
 		signal: AbortSignal,
 	) => Request | Promise<Request>
-	onResponse?: (bids: Bid[], signal: AbortSignal) => Bid[] | Promise<Bid[]>
+	onResponse?: (bids: Bid[], errors: readonly DemandError[], signal: AbortSignal) => Bid[] | Promise<Bid[]>
 }
 
 export interface DemandPlugin {

@@ -8,14 +8,23 @@ export type ParseResult =
 function extractSeatbid(json: unknown): Seatbid[] | undefined {
 	if (typeof json !== "object" || json === null) return undefined
 	const obj = json as Record<string, unknown>
-	// Openrtb wrapper: { openrtb: { response: { seatbid } } }
-	if ("openrtb" in obj) {
-		const openrtb = obj.openrtb as Record<string, unknown> | undefined
-		const response = openrtb?.response as Record<string, unknown> | undefined
-		return response?.seatbid as Seatbid[] | undefined
+
+	// Openrtb envelope: { ver?, domainver, response: { seatbid } }
+	if (
+		"response" in obj &&
+		typeof obj.response === "object" &&
+		obj.response !== null
+	) {
+		const response = obj.response as Record<string, unknown>
+		return response.seatbid as Seatbid[] | undefined
 	}
+
 	// Bare Response: { seatbid }
-	return obj.seatbid as Seatbid[] | undefined
+	if ("seatbid" in obj) {
+		return obj.seatbid as Seatbid[] | undefined
+	}
+
+	return undefined
 }
 
 export async function parseResponse(
