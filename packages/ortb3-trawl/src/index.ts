@@ -1,5 +1,5 @@
 export { createAdSlots } from "./create-ad-slots.js"
-export { imp, banner, video, native } from "./helpers.js"
+export { item, banner, video, native } from "./helpers.js"
 export { auction, byPrice, byDeal } from "./auction.js"
 
 export type {

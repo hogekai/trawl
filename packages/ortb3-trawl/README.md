@@ -11,10 +11,10 @@ pnpm add @trawl/ortb3-trawl
 ## Quick Start
 
 ```typescript
-import { createAdSlots, imp, banner, auction, byPrice } from "@trawl/ortb3-trawl"
+import { createAdSlots, item, banner, auction, byPrice } from "@trawl/ortb3-trawl"
 
 const slots = createAdSlots([
-  imp("imp-1", banner([300, 250], [728, 90])),
+  item("imp-1", banner([300, 250], [728, 90])),
 ])
 
 slots.demand({
@@ -32,7 +32,7 @@ const winners = auction(result.bids, byPrice())
 
 エントリポイント。Item配列からAdSlotsインスタンスを生成する。
 
-- `items` — `Item[]` OpenRTB 3.0 Item（`imp()` ヘルパーで生成）
+- `items` — `Item[]` OpenRTB 3.0 Item（`item()` ヘルパーで生成）
 - `options.clone` — リクエストのクローン関数（デフォルト: `structuredClone`）
 - `options.fetcher` — fetch関数（デフォルト: `globalThis.fetch`）
 
@@ -41,7 +41,7 @@ const winners = auction(result.bids, byPrice())
 - `demand(adapter)` — DemandAdapterを登録、`DemandHandle` を返す
 - `bid(options?)` — 入札パイプラインを実行、`Promise<BidResult>` を返す
 
-### `imp(id, ...placements): Item`
+### `item(id, ...placements): Item`
 
 Item を生成する。Placement を可変長引数でマージ。
 
@@ -59,7 +59,7 @@ Item を生成する。Placement を可変長引数でマージ。
 
 ### `auction(bids, strategy): Map<string, Bid>`
 
-BidResult の bids Map に対してオークション戦略を適用し、デマンドごとの勝者を返す。
+BidResult の bids Map（impIdキー）に対してオークション戦略を適用し、枠ごとの勝者を返す。
 
 ### `byPrice(): AuctionStrategy`
 
@@ -112,12 +112,12 @@ interface DemandAdapter {
 ## 実行順序
 
 ```
-Phase 1: Global onRequest plugins（順次）
-Phase 2: デマンドごとに並列
-  → Clone → Demand onRequest plugins → Build → Fetch → Parse
-Phase 3: Demand onResponse plugins（デマンドごとに並列）
-Phase 4: Global onResponse plugins（順次）
-Phase 5: Map再構築 → BidResult
+1. Global onRequest plugins（順次）
+2. デマンドごとに並列:
+   Clone → Demand onRequest plugins → extensions/impExt → Fetch → Parse
+3. Demand onResponse plugins（デマンドごとに並列）
+4. Global onResponse plugins（順次）
+→ BidResult { bids: Map<impId, Bid[]>, errors }
 ```
 
 ## BidOptions

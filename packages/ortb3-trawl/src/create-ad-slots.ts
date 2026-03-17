@@ -17,7 +17,6 @@ import type {
 	DemandHandle,
 	DemandPlugin,
 	Plugin,
-	TrawlBidExt,
 } from "./types.js"
 
 interface DemandEntry {
@@ -39,7 +38,7 @@ export function createAdSlots(
 	const ids = new Set<string>()
 	for (const item of items) {
 		if (ids.has(item.id)) {
-			throw new Error(`Duplicate imp id: "${item.id}"`)
+			throw new Error(`Duplicate item id: "${item.id}"`)
 		}
 		ids.add(item.id)
 	}
@@ -211,13 +210,10 @@ export function createAdSlots(
 		)
 		allErrors.push(...globalRespResult.errors)
 
-		// Rebuild Map from post-plugin bids using ext.trawl.demandName
+		// Rebuild Map keyed by impId (bid.item)
 		const finalMap = new Map<string, Bid[]>()
 		for (const bid of globalRespResult.bids) {
-			const trawl = (bid.ext as Record<string, unknown> | undefined)?.trawl as
-				| TrawlBidExt
-				| undefined
-			const key = trawl?.demandName ?? "unknown"
+			const key = bid.item
 			const arr = finalMap.get(key)
 			if (arr) {
 				arr.push(bid)

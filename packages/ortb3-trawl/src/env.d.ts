@@ -21,9 +21,16 @@ declare global {
 
 	function structuredClone<T>(value: T): T
 
+	interface MinimalRequestInit {
+		method?: string
+		headers?: Record<string, string>
+		body?: string
+		signal?: AbortSignal
+	}
+
 	function fetch(
 		input: string | URL,
-		init?: Record<string, unknown>,
+		init?: MinimalRequestInit,
 	): Promise<Response>
 
 	interface Response {

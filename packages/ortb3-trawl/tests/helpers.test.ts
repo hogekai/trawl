@@ -1,22 +1,18 @@
 import { describe, expect, it } from "vitest"
-import { banner, imp, native, video } from "../src/index.js"
+import { banner, item, native, video } from "../src/index.js"
 
-describe("imp()", () => {
+describe("item()", () => {
 	it("creates an Item with id and spec", () => {
-		const item = imp("slot-1", banner([728, 90]))
-		expect(item.id).toBe("slot-1")
-		expect(item.spec).toBeDefined()
-		expect(item.spec.display?.displayfmt).toEqual([{ w: 728, h: 90 }])
+		const i = item("slot-1", banner([728, 90]))
+		expect(i.id).toBe("slot-1")
+		expect(i.spec).toBeDefined()
+		expect(i.spec.display?.displayfmt).toEqual([{ w: 728, h: 90 }])
 	})
 
 	it("merges multiple placements for multi-format", () => {
-		const item = imp(
-			"multi",
-			banner([300, 250]),
-			video({ mimes: ["video/mp4"] }),
-		)
-		expect(item.spec.display?.displayfmt).toEqual([{ w: 300, h: 250 }])
-		expect(item.spec.video?.mime).toEqual(["video/mp4"])
+		const i = item("multi", banner([300, 250]), video({ mimes: ["video/mp4"] }))
+		expect(i.spec.display?.displayfmt).toEqual([{ w: 300, h: 250 }])
+		expect(i.spec.video?.mime).toEqual(["video/mp4"])
 	})
 })
 

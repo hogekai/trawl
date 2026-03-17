@@ -8,7 +8,7 @@ import type { Item } from "iab-openrtb/v30"
 
 type PartialPlacement = Partial<Placement>
 
-export function imp(id: string, ...placements: PartialPlacement[]): Item {
+export function item(id: string, ...placements: PartialPlacement[]): Item {
 	const spec = Object.assign({}, ...placements) as Placement
 	return { id, spec }
 }
