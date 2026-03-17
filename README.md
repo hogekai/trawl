@@ -1,6 +1,6 @@
 # trawl
 
-OpenRTB 入札収集ライブラリ群。
+OpenRTB bid collection libraries.
 
 ## Packages
 

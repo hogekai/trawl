@@ -31,15 +31,15 @@ slots.demand({
 
 ### `consent(getTCData): Plugin`
 
-TCF consent をリクエストに設定するグローバルPlugin。`regs.ext.gdpr` と `user.ext.consent` を付与する。
+Global plugin that sets TCF consent on the request. Adds `regs.ext.gdpr` and `user.ext.consent`.
 
 ### `sync(type, buildUrl): DemandPlugin`
 
-Cookie sync ピクセル（`"image"`）または iframe（`"iframe"`）をレスポンス時に発火するデマンドPlugin。
+Demand plugin that fires a cookie sync pixel (`"image"`) or iframe (`"iframe"`) on response.
 
 ### `topics(): Plugin`
 
-Topics API の結果を `user.ext.browsing_topics` に設定するグローバルPlugin。API が利用不可の場合はスキップする。
+Global plugin that sets Topics API results to `user.ext.browsing_topics`. Skips if the API is unavailable.
 
 ## Peer Dependencies
 
