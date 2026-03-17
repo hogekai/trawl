@@ -297,6 +297,113 @@ describe("bid() integration", () => {
 		expect(result.bids.get("imp-1")).toHaveLength(1)
 	})
 
+	it("applies request defaults (at, cur, tmax) to template", async () => {
+		const bodies: unknown[] = []
+		const fetcher = (async (
+			_url: string | URL,
+			init?: Record<string, unknown>,
+		) => {
+			bodies.push(JSON.parse(init?.body as string))
+			return {
+				ok: true,
+				status: 200,
+				json: async () => ortbResponse([]),
+			} as Response
+		}) as typeof globalThis.fetch
+
+		const ads = createAdSlots([item("imp-1", banner([[300, 250]]))], {
+			fetcher,
+			request: { at: 1, cur: ["USD", "JPY"], tmax: 200 },
+		})
+		ads.demand({ name: "dsp-a", endpoint: "https://dsp-a.com/bid" })
+		await ads.bid()
+
+		const envelope = bodies[0] as Record<string, unknown>
+		const req = envelope.request as Record<string, unknown>
+		expect(req.at).toBe(1)
+		expect(req.cur).toEqual(["USD", "JPY"])
+		expect(req.tmax).toBe(200)
+	})
+
+	it("does not allow request.id or request.item override", async () => {
+		const bodies: unknown[] = []
+		const fetcher = (async (
+			_url: string | URL,
+			init?: Record<string, unknown>,
+		) => {
+			bodies.push(JSON.parse(init?.body as string))
+			return {
+				ok: true,
+				status: 200,
+				json: async () => ortbResponse([]),
+			} as Response
+		}) as typeof globalThis.fetch
+
+		const ads = createAdSlots([item("imp-1", banner([[300, 250]]))], {
+			fetcher,
+			request: { id: "hack", item: [] } as never,
+		})
+		ads.demand({ name: "dsp-a", endpoint: "https://dsp-a.com/bid" })
+		const result = await ads.bid()
+
+		const envelope = bodies[0] as Record<string, unknown>
+		const req = envelope.request as Record<string, unknown>
+		expect(req.id).toBe(result.requestId)
+		expect(req.id).not.toBe("hack")
+		expect((req.item as unknown[]).length).toBeGreaterThan(0)
+	})
+
+	it("uses default envelope when openrtb option is omitted", async () => {
+		const bodies: unknown[] = []
+		const fetcher = (async (
+			_url: string | URL,
+			init?: Record<string, unknown>,
+		) => {
+			bodies.push(JSON.parse(init?.body as string))
+			return {
+				ok: true,
+				status: 200,
+				json: async () => ortbResponse([]),
+			} as Response
+		}) as typeof globalThis.fetch
+
+		const ads = createAdSlots([item("imp-1", banner([[300, 250]]))], { fetcher })
+		ads.demand({ name: "dsp-a", endpoint: "https://dsp-a.com/bid" })
+		await ads.bid()
+
+		const envelope = bodies[0] as Record<string, unknown>
+		expect(envelope.ver).toBe("3.0")
+		expect(envelope.domainspec).toBe("adcom")
+		expect(envelope.domainver).toBe("1.0")
+	})
+
+	it("customizes envelope with openrtb option", async () => {
+		const bodies: unknown[] = []
+		const fetcher = (async (
+			_url: string | URL,
+			init?: Record<string, unknown>,
+		) => {
+			bodies.push(JSON.parse(init?.body as string))
+			return {
+				ok: true,
+				status: 200,
+				json: async () => ortbResponse([]),
+			} as Response
+		}) as typeof globalThis.fetch
+
+		const ads = createAdSlots([item("imp-1", banner([[300, 250]]))], {
+			fetcher,
+			openrtb: { ver: "3.1", domainver: "1.1" },
+		})
+		ads.demand({ name: "dsp-a", endpoint: "https://dsp-a.com/bid" })
+		await ads.bid()
+
+		const envelope = bodies[0] as Record<string, unknown>
+		expect(envelope.ver).toBe("3.1")
+		expect(envelope.domainspec).toBe("adcom")
+		expect(envelope.domainver).toBe("1.1")
+	})
+
 	it("generates unique requestId per bid() call", async () => {
 		const ads = createAdSlots([item("imp-1", banner([[300, 250]]))])
 		const r1 = await ads.bid()

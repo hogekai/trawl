@@ -68,6 +68,12 @@ export interface DemandHandle {
 export interface AdSlotsOptions {
 	clone?: (req: Request) => Request
 	fetcher?: typeof globalThis.fetch
+	request?: Partial<Omit<Request, "id" | "item">>
+	openrtb?: {
+		ver?: string
+		domainspec?: string
+		domainver?: string
+	}
 }
 
 export interface BidOptions {

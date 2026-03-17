@@ -32,6 +32,10 @@ export async function parseResponse(
 	demandName: string,
 	requestId: string,
 ): Promise<ParseResult> {
+	if (response.status === 204) {
+		return { ok: true, bids: [] }
+	}
+
 	if (!response.ok) {
 		return {
 			ok: false,

@@ -74,7 +74,11 @@ export function createAdSlots(
 		const allErrors: DemandError[] = []
 
 		// Build template request
-		let templateReq: Request = { id: requestId, item: items }
+		let templateReq: Request = {
+			...options?.request,
+			id: requestId,
+			item: items,
+		}
 		Object.freeze(templateReq.item)
 
 		// Phase 1: Global request plugins
@@ -107,7 +111,7 @@ export function createAdSlots(
 				errors.push(...pluginResult.errors)
 
 				// c) Build the demand request
-				const buildResult = buildDemandRequest(pluginResult.request, adapter)
+				const buildResult = buildDemandRequest(pluginResult.request, adapter, options?.openrtb)
 				if (!buildResult.ok) {
 					errors.push(buildResult.error)
 					return { demandName, bids: [], plugins: demandPlugins, errors }

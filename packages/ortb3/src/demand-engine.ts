@@ -17,9 +17,16 @@ export type BuildResult =
 	| { ok: true; skipped: true; value: DemandSkipped }
 	| { ok: false; error: DemandError }
 
+export interface EnvelopeConfig {
+	ver?: string
+	domainspec?: string
+	domainver?: string
+}
+
 export function buildDemandRequest(
 	req: Request,
 	adapter: DemandAdapter,
+	envelopeConfig?: EnvelopeConfig,
 ): BuildResult {
 	Object.freeze(req.item)
 
@@ -119,9 +126,9 @@ export function buildDemandRequest(
 		adapter.fetchOptions?.contentType ?? "application/json"
 
 	const envelope: Openrtb = {
-		ver: "3.0",
-		domainspec: "adcom",
-		domainver: "1.0",
+		ver: envelopeConfig?.ver ?? "3.0",
+		domainspec: envelopeConfig?.domainspec ?? "adcom",
+		domainver: envelopeConfig?.domainver ?? "1.0",
 		request: req,
 	}
 	let body = JSON.stringify(envelope)

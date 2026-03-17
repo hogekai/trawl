@@ -22,6 +22,30 @@ function mockJsonError(status = 200): Response {
 }
 
 describe("parseResponse", () => {
+	it("returns empty bids for HTTP 204 no-bid", async () => {
+		const result = await parseResponse(
+			{
+				ok: true,
+				status: 204,
+				json: async () => {
+					throw new SyntaxError("Unexpected end of JSON input")
+				},
+			} as Response,
+			"demand-a",
+			"req-1",
+		)
+		expect(result.ok).toBe(true)
+		if (!result.ok) throw new Error("unexpected")
+		expect(result.bids).toEqual([])
+	})
+
+	it("returns parse error for 200 with empty body", async () => {
+		const result = await parseResponse(mockJsonError(), "demand-a", "req-1")
+		expect(result.ok).toBe(false)
+		if (result.ok) throw new Error("unexpected")
+		expect(result.error.type).toBe("parse")
+	})
+
 	it("returns network error for non-ok response", async () => {
 		const result = await parseResponse(
 			mockResponse(null, 500),
