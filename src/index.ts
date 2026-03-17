@@ -1,5 +1,6 @@
 export { createAdSlots } from "./create-ad-slots.js"
 export { imp, banner, video, native } from "./helpers.js"
+export { auction, byPrice, byDeal } from "./auction.js"
 
 export type {
 	Bid,
@@ -15,6 +16,7 @@ export type {
 	DemandExtensions,
 	DemandHandle,
 	BidOptions,
+	AdSlotsOptions,
 	AdSlots,
 	AuctionStrategy,
 } from "./types.js"

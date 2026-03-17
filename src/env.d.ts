@@ -6,6 +6,21 @@ declare global {
 		removeEventListener(type: "abort", listener: () => void): void
 	}
 
+	const AbortSignal: {
+		timeout(ms: number): AbortSignal
+	}
+
+	class AbortController {
+		readonly signal: AbortSignal
+		abort(reason?: unknown): void
+	}
+
+	const crypto: {
+		randomUUID(): string
+	}
+
+	function structuredClone<T>(value: T): T
+
 	function fetch(input: string | URL, init?: Record<string, unknown>): Promise<Response>
 
 	interface Response {
