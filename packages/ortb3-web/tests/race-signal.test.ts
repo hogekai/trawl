@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest"
-import { raceSignal } from "../../src/web/race-signal.js"
+import { raceSignal } from "../src/race-signal.js"
 
 describe("raceSignal", () => {
 	it("resolves when promise resolves before signal", async () => {

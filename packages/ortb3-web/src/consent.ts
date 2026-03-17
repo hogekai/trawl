@@ -1,5 +1,5 @@
 import type { Request } from "iab-openrtb/v30"
-import type { Plugin } from "../types.js"
+import type { Plugin } from "@trawl/ortb3"
 import { raceSignal } from "./race-signal.js"
 
 export interface TCData {

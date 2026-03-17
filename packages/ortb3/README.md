@@ -1,17 +1,17 @@
-# @trawl/ortb3-trawl
+# @trawl/ortb3
 
 OpenRTB 3.0 入札収集ライブラリ。プラグインベースのアーキテクチャでリクエスト/レスポンスを変換し、複数デマンドへ並列にリクエストを送信する。
 
 ## Install
 
 ```bash
-pnpm add @trawl/ortb3-trawl
+pnpm add @trawl/ortb3
 ```
 
 ## Quick Start
 
 ```typescript
-import { createAdSlots, item, banner, auction, byPrice } from "@trawl/ortb3-trawl"
+import { createAdSlots, item, banner, auction, byPrice } from "@trawl/ortb3"
 
 const slots = createAdSlots([
   item("imp-1", banner([300, 250], [728, 90])),
@@ -131,17 +131,8 @@ interface BidOptions {
 
 ## Web Plugins
 
-ブラウザ向けプラグインは `@trawl/ortb3-trawl/web` からインポート。
-
-```typescript
-import { consent, sync, topics } from "@trawl/ortb3-trawl/web"
-```
-
-- `consent(getTCData)` — TCF consent をリクエストに設定（グローバルPlugin）
-- `sync(type, buildUrl)` — Cookie sync ピクセル/iframe を発火（DemandPlugin）
-- `topics()` — Topics API の結果をリクエストに設定（グローバルPlugin）
+ブラウザ向けプラグイン（consent, sync, topics）は [@trawl/ortb3-web](../ortb3-web) を参照。
 
 ## 対応環境
 
 - Node.js >= 18
-- ブラウザ（web プラグイン使用時）

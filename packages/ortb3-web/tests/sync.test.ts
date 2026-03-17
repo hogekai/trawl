@@ -1,6 +1,6 @@
 import type { Bid } from "iab-openrtb/v30"
 import { afterEach, describe, expect, it, vi } from "vitest"
-import { sync } from "../../src/web/sync.js"
+import { sync } from "../src/sync.js"
 
 const originalImage = globalThis.Image
 const originalDocument = (globalThis as Record<string, unknown>).document

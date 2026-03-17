@@ -12,15 +12,37 @@ importers:
         specifier: ^1.9.0
         version: 1.9.4
 
-  packages/ortb3-trawl:
+  packages/ortb3:
     dependencies:
       iab-adcom:
-        specifier: '*'
+        specifier: ^2.0.1
         version: 2.0.1
       iab-openrtb:
-        specifier: '*'
+        specifier: ^2.1.0
         version: 2.1.0
     devDependencies:
+      tsup:
+        specifier: ^8.0.0
+        version: 8.5.1(postcss@8.5.8)(typescript@5.9.3)
+      typescript:
+        specifier: ^5.7.0
+        version: 5.9.3
+      vitest:
+        specifier: ^3.0.0
+        version: 3.2.4
+
+  packages/ortb3-web:
+    dependencies:
+      iab-openrtb:
+        specifier: ^2.1.0
+        version: 2.1.0
+    devDependencies:
+      '@trawl/ortb3':
+        specifier: workspace:*
+        version: link:../ortb3
+      iab-adcom:
+        specifier: ^2.0.1
+        version: 2.0.1
       tsup:
         specifier: ^8.0.0
         version: 8.5.1(postcss@8.5.8)(typescript@5.9.3)

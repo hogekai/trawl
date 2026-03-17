@@ -1,6 +1,6 @@
 import type { Request } from "iab-openrtb/v30"
 import { afterEach, describe, expect, it, vi } from "vitest"
-import { topics } from "../../src/web/topics.js"
+import { topics } from "../src/topics.js"
 
 const originalDocument = (globalThis as Record<string, unknown>).document
 

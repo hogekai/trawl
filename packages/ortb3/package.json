@@ -1,5 +1,5 @@
 {
-	"name": "@trawl/ortb3-trawl",
+	"name": "@trawl/ortb3",
 	"version": "0.1.0",
 	"type": "module",
 	"description": "OpenRTB 3.0 bid collection library",
@@ -7,7 +7,7 @@
 	"repository": {
 		"type": "git",
 		"url": "https://github.com/hogekai/trawl.git",
-		"directory": "packages/ortb3-trawl"
+		"directory": "packages/ortb3"
 	},
 	"keywords": ["openrtb", "bidding", "programmatic", "advertising", "ssp"],
 	"engines": {
@@ -17,17 +17,13 @@
 		".": {
 			"import": "./dist/index.js",
 			"types": "./dist/index.d.ts"
-		},
-		"./web": {
-			"import": "./dist/web/index.js",
-			"types": "./dist/web/index.d.ts"
 		}
 	},
 	"files": ["dist"],
 	"scripts": {
 		"build": "tsup",
 		"test": "vitest run",
-		"typecheck": "tsc --noEmit && tsc --noEmit -p tsconfig.web.json"
+		"typecheck": "tsc --noEmit"
 	},
 	"dependencies": {
 		"iab-openrtb": "^2.1.0",

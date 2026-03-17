@@ -1,0 +1,41 @@
+{
+	"name": "@trawl/ortb3-web",
+	"version": "0.1.0",
+	"type": "module",
+	"description": "Browser plugins for @trawl/ortb3",
+	"license": "MIT",
+	"repository": {
+		"type": "git",
+		"url": "https://github.com/hogekai/trawl.git",
+		"directory": "packages/ortb3-web"
+	},
+	"keywords": ["openrtb", "programmatic", "advertising", "consent", "tcf", "topics"],
+	"engines": {
+		"node": ">=18"
+	},
+	"exports": {
+		".": {
+			"import": "./dist/index.js",
+			"types": "./dist/index.d.ts"
+		}
+	},
+	"files": ["dist"],
+	"scripts": {
+		"build": "tsup",
+		"test": "vitest run",
+		"typecheck": "tsc --noEmit"
+	},
+	"peerDependencies": {
+		"@trawl/ortb3": "^0.1.0"
+	},
+	"dependencies": {
+		"iab-openrtb": "^2.1.0"
+	},
+	"devDependencies": {
+		"@trawl/ortb3": "workspace:*",
+		"iab-adcom": "^2.0.1",
+		"typescript": "^5.7.0",
+		"tsup": "^8.0.0",
+		"vitest": "^3.0.0"
+	}
+}

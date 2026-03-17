@@ -1,5 +1,5 @@
 import type { Bid } from "iab-openrtb/v30"
-import type { DemandPlugin } from "../types.js"
+import type { DemandPlugin } from "@trawl/ortb3"
 
 export function sync(
 	type: "image" | "iframe",

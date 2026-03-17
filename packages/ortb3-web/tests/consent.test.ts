@@ -1,6 +1,6 @@
 import type { Request } from "iab-openrtb/v30"
 import { describe, expect, it, vi } from "vitest"
-import { consent } from "../../src/web/consent.js"
+import { consent } from "../src/consent.js"
 
 function makeReq(id = "req-1"): Request {
 	return { id, item: [] }

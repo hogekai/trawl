@@ -1,4 +1,16 @@
 declare global {
+	interface AbortSignal {
+		readonly aborted: boolean
+		readonly reason: unknown
+		addEventListener(type: "abort", listener: () => void): void
+		removeEventListener(type: "abort", listener: () => void): void
+	}
+
+	class AbortController {
+		readonly signal: AbortSignal
+		abort(reason?: unknown): void
+	}
+
 	class Image {
 		src: string
 	}
