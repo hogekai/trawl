@@ -14,7 +14,7 @@ pnpm add @trawl/ortb3
 import { createAdSlots, item, banner, auction, byPrice } from "@trawl/ortb3"
 
 const slots = createAdSlots([
-  item("imp-1", banner([300, 250], [728, 90])),
+  item("imp-1", banner([[300, 250], [728, 90]])),
 ])
 
 slots.demand({
@@ -43,19 +43,36 @@ const winners = auction(result.bids, byPrice())
 
 ### `item(id, ...placements): Item`
 
-Item を生成する。Placement を可変長引数でマージ。
+Item を生成する。Placement を可変長引数で deep merge。`banner()` と `native()` を同時に渡しても `display` 内の `displayfmt` と `nativefmt` が共存する。
 
-### `banner(...sizes): Placement`
+### `banner(sizes, options?): Placement`
 
-バナー Placement を生成。`sizes` は `[width, height]` のタプル配列。
+バナー Placement を生成。`sizes` は `[width, height][]`。`options` で `DisplayPlacement` のフィールド（`pos`, `instl` 等）を設定可能。
+
+```typescript
+banner([[300, 250], [728, 90]])
+banner([[300, 250]], { pos: 1 })
+```
 
 ### `video(params): Placement`
 
-ビデオ Placement を生成。`params.mimes` は必須。
+ビデオ Placement を生成。`params.mimes` は必須。`VideoPlacement` のフィールド（`mindur`, `maxdur`, `w`, `h` 等）を直接渡せる。
 
-### `native(params): Placement`
+```typescript
+video({ mimes: ["video/mp4"], maxdur: 30 })
+```
 
-ネイティブ Placement を生成。`params.title`（最大文字数）、`params.image`（画像タイプ）。
+### `native(assets): Placement`
+
+ネイティブ Placement を生成。`assets` は `NativeAsset[]`。各アセットに `title`, `img`, `data`, `video` を指定でき、`req` フラグも設定可能。`id` は自動採番。
+
+```typescript
+native([
+  { req: 1, title: { len: 90 } },
+  { req: 1, img: { type: 3 } },
+  { data: { type: 1, len: 100 } },
+])
+```
 
 ### `auction(bids, strategy): Map<string, Bid>`
 

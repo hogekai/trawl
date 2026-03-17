@@ -27,7 +27,7 @@ function ortbResponse(bids: Array<{ item: string; price: number }>): unknown {
 
 describe("bid() integration", () => {
 	it("returns bids from a single demand", async () => {
-		const ads = createAdSlots([item("imp-1", banner([300, 250]))], {
+		const ads = createAdSlots([item("imp-1", banner([[300, 250]]))], {
 			fetcher: mockFetcherFromMap({
 				"https://dsp-a.com/bid": ortbResponse([{ item: "imp-1", price: 2.5 }]),
 			}),
@@ -45,7 +45,7 @@ describe("bid() integration", () => {
 	})
 
 	it("returns bids from multiple demands", async () => {
-		const ads = createAdSlots([item("imp-1", banner([300, 250]))], {
+		const ads = createAdSlots([item("imp-1", banner([[300, 250]]))], {
 			fetcher: mockFetcherFromMap({
 				"https://dsp-a.com/bid": ortbResponse([{ item: "imp-1", price: 1.0 }]),
 				"https://dsp-b.com/bid": ortbResponse([{ item: "imp-1", price: 3.0 }]),
@@ -84,7 +84,7 @@ describe("bid() integration", () => {
 			} as Response
 		}) as typeof globalThis.fetch
 
-		const ads = createAdSlots([item("imp-1", banner([300, 250]))], { fetcher })
+		const ads = createAdSlots([item("imp-1", banner([[300, 250]]))], { fetcher })
 		ads.demand({ name: "fast", endpoint: "https://fast.com/bid" })
 		ads.demand({ name: "slow", endpoint: "https://slow.com/bid" })
 		const result = await ads.bid({ timeout: 50 })
@@ -95,7 +95,7 @@ describe("bid() integration", () => {
 	})
 
 	it("handles full failure (all demands error)", async () => {
-		const ads = createAdSlots([item("imp-1", banner([300, 250]))], {
+		const ads = createAdSlots([item("imp-1", banner([[300, 250]]))], {
 			fetcher: (async () => {
 				throw new TypeError("network down")
 			}) as typeof globalThis.fetch,
@@ -109,7 +109,7 @@ describe("bid() integration", () => {
 	})
 
 	it("returns empty BidResult with no demands", async () => {
-		const ads = createAdSlots([item("imp-1", banner([300, 250]))])
+		const ads = createAdSlots([item("imp-1", banner([[300, 250]]))])
 		const result = await ads.bid()
 		expect(result.bids.size).toBe(0)
 		expect(result.errors).toEqual([])
@@ -130,7 +130,7 @@ describe("bid() integration", () => {
 			} as Response
 		}) as typeof globalThis.fetch
 
-		const ads = createAdSlots([item("imp-1", banner([300, 250]))], { fetcher })
+		const ads = createAdSlots([item("imp-1", banner([[300, 250]]))], { fetcher })
 		ads.use({
 			name: "global-ext",
 			onRequest: (req) => {
@@ -166,7 +166,7 @@ describe("bid() integration", () => {
 			} as Response
 		}) as typeof globalThis.fetch
 
-		const ads = createAdSlots([item("imp-1", banner([300, 250]))], { fetcher })
+		const ads = createAdSlots([item("imp-1", banner([[300, 250]]))], { fetcher })
 		ads.demand({ name: "dsp-a", endpoint: "https://dsp-a.com/bid" }).with({
 			name: "a-plugin",
 			onRequest: (req) => {
@@ -186,7 +186,7 @@ describe("bid() integration", () => {
 	})
 
 	it("demand response plugin filters bids", async () => {
-		const ads = createAdSlots([item("imp-1", banner([300, 250]))], {
+		const ads = createAdSlots([item("imp-1", banner([[300, 250]]))], {
 			fetcher: mockFetcherFromMap({
 				"https://dsp-a.com/bid": ortbResponse([
 					{ item: "imp-1", price: 0.5 },
@@ -209,7 +209,7 @@ describe("bid() integration", () => {
 	})
 
 	it("global response plugin filters across demands", async () => {
-		const ads = createAdSlots([item("imp-1", banner([300, 250]))], {
+		const ads = createAdSlots([item("imp-1", banner([[300, 250]]))], {
 			fetcher: mockFetcherFromMap({
 				"https://dsp-a.com/bid": ortbResponse([{ item: "imp-1", price: 0.5 }]),
 				"https://dsp-b.com/bid": ortbResponse([{ item: "imp-1", price: 3.0 }]),
@@ -229,7 +229,7 @@ describe("bid() integration", () => {
 
 	it("skips fetch when buildDemandRequest returns skipped", async () => {
 		const fetchFn = vi.fn()
-		const ads = createAdSlots([item("imp-1", banner([300, 250]))], {
+		const ads = createAdSlots([item("imp-1", banner([[300, 250]]))], {
 			fetcher: fetchFn as unknown as typeof globalThis.fetch,
 		})
 		ads.demand({
@@ -244,7 +244,7 @@ describe("bid() integration", () => {
 	})
 
 	it("collects error when buildDemandRequest fails", async () => {
-		const ads = createAdSlots([item("imp-1", banner([300, 250]))], {
+		const ads = createAdSlots([item("imp-1", banner([[300, 250]]))], {
 			fetcher: mockFetcherFromMap({}),
 		})
 		ads.demand({
@@ -261,7 +261,7 @@ describe("bid() integration", () => {
 	})
 
 	it("uses consistent requestId across result and errors", async () => {
-		const ads = createAdSlots([item("imp-1", banner([300, 250]))], {
+		const ads = createAdSlots([item("imp-1", banner([[300, 250]]))], {
 			fetcher: (async () => {
 				throw new TypeError("fail")
 			}) as typeof globalThis.fetch,
@@ -275,7 +275,7 @@ describe("bid() integration", () => {
 	})
 
 	it("plugin error is collected but pipeline continues", async () => {
-		const ads = createAdSlots([item("imp-1", banner([300, 250]))], {
+		const ads = createAdSlots([item("imp-1", banner([[300, 250]]))], {
 			fetcher: mockFetcherFromMap({
 				"https://dsp-a.com/bid": ortbResponse([{ item: "imp-1", price: 1.0 }]),
 			}),
@@ -298,7 +298,7 @@ describe("bid() integration", () => {
 	})
 
 	it("generates unique requestId per bid() call", async () => {
-		const ads = createAdSlots([item("imp-1", banner([300, 250]))])
+		const ads = createAdSlots([item("imp-1", banner([[300, 250]]))])
 		const r1 = await ads.bid()
 		const r2 = await ads.bid()
 		expect(r1.requestId).not.toBe(r2.requestId)

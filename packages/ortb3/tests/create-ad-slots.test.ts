@@ -4,7 +4,7 @@ import { banner, createAdSlots, item, video } from "../src/index.js"
 
 describe("createAdSlots", () => {
 	it("returns an AdSlots object with use, demand, and bid methods", () => {
-		const ads = createAdSlots([item("header", banner([728, 90]))])
+		const ads = createAdSlots([item("header", banner([[728, 90]]))])
 		expect(ads).toHaveProperty("use")
 		expect(ads).toHaveProperty("demand")
 		expect(ads).toHaveProperty("bid")
@@ -29,7 +29,7 @@ describe("createAdSlots", () => {
 			id: "raw-1",
 			spec: { video: { mime: ["video/mp4"] } },
 		}
-		const ads = createAdSlots([item("header", banner([728, 90])), rawItem])
+		const ads = createAdSlots([item("header", banner([[728, 90]])), rawItem])
 		expect(ads).toHaveProperty("bid")
 	})
 
@@ -41,15 +41,15 @@ describe("createAdSlots", () => {
 	it("throws on duplicate item ids", () => {
 		expect(() =>
 			createAdSlots([
-				item("dup", banner([728, 90])),
-				item("dup", banner([300, 250])),
+				item("dup", banner([[728, 90]])),
+				item("dup", banner([[300, 250]])),
 			]),
 		).toThrow(/Duplicate item id: "dup"/)
 	})
 
 	describe("use()", () => {
 		it("registers a global plugin without throwing", () => {
-			const ads = createAdSlots([item("a", banner([728, 90]))])
+			const ads = createAdSlots([item("a", banner([[728, 90]]))])
 			expect(() => {
 				ads.use({ name: "test-plugin" })
 			}).not.toThrow()
@@ -58,7 +58,7 @@ describe("createAdSlots", () => {
 
 	describe("demand()", () => {
 		it("returns a DemandHandle with a with() method", () => {
-			const ads = createAdSlots([item("a", banner([728, 90]))])
+			const ads = createAdSlots([item("a", banner([[728, 90]]))])
 			const handle = ads.demand({
 				name: "test-demand",
 				endpoint: "https://example.com/bid",
@@ -68,7 +68,7 @@ describe("createAdSlots", () => {
 		})
 
 		it("supports method chaining with with()", () => {
-			const ads = createAdSlots([item("a", banner([728, 90]))])
+			const ads = createAdSlots([item("a", banner([[728, 90]]))])
 			const handle = ads.demand({
 				name: "test-demand",
 				endpoint: "https://example.com/bid",
@@ -82,7 +82,7 @@ describe("createAdSlots", () => {
 
 	describe("bid()", () => {
 		it("returns a BidResult", async () => {
-			const ads = createAdSlots([item("a", banner([728, 90]))])
+			const ads = createAdSlots([item("a", banner([[728, 90]]))])
 			const result = await ads.bid()
 			expect(result).toHaveProperty("requestId")
 			expect(result).toHaveProperty("bids")
