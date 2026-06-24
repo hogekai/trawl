@@ -1,4 +1,3 @@
-import type { Bid, Request } from "iab-openrtb/v30"
 import type { DemandError, DemandPlugin, Plugin } from "./types.js"
 
 async function runPluginsSequential<T>(
@@ -48,15 +47,18 @@ function formatError(
 	}
 }
 
-export async function runGlobalRequestPlugins(
-	plugins: readonly Plugin[],
-	request: Request,
+export async function runGlobalRequestPlugins<
+	TReq extends { id: string },
+	TBid,
+>(
+	plugins: readonly Plugin<TReq, TBid>[],
+	request: TReq,
 	pluginTimeout: number | undefined,
-): Promise<{ request: Request; errors: DemandError[] }> {
+): Promise<{ request: TReq; errors: DemandError[] }> {
 	const signal = makeSignal(pluginTimeout)
-	const { value, errors } = await runPluginsSequential(
+	const { value, errors } = await runPluginsSequential<TReq>(
 		plugins,
-		(p) => (p as Plugin).onRequest,
+		(p) => (p as Plugin<TReq, TBid>).onRequest,
 		request,
 		signal,
 		(name, err) => formatError(request.id, `plugin:${name}`, err),
@@ -64,15 +66,18 @@ export async function runGlobalRequestPlugins(
 	return { request: value, errors }
 }
 
-export async function runDemandRequestPlugins(
-	plugins: readonly DemandPlugin[],
-	request: Request,
+export async function runDemandRequestPlugins<
+	TReq extends { id: string },
+	TBid,
+>(
+	plugins: readonly DemandPlugin<TReq, TBid>[],
+	request: TReq,
 	signal: AbortSignal,
 	demandName: string,
-): Promise<{ request: Request; errors: DemandError[] }> {
-	const { value, errors } = await runPluginsSequential(
+): Promise<{ request: TReq; errors: DemandError[] }> {
+	const { value, errors } = await runPluginsSequential<TReq>(
 		plugins,
-		(p) => (p as DemandPlugin).onRequest,
+		(p) => (p as DemandPlugin<TReq, TBid>).onRequest,
 		request,
 		signal,
 		(_, err) => formatError(request.id, demandName, err),
@@ -80,21 +85,24 @@ export async function runDemandRequestPlugins(
 	return { request: value, errors }
 }
 
-export async function runDemandResponsePlugins(
-	plugins: readonly DemandPlugin[],
-	bids: Bid[],
-	request: Request,
+export async function runDemandResponsePlugins<
+	TReq extends { id: string },
+	TBid,
+>(
+	plugins: readonly DemandPlugin<TReq, TBid>[],
+	bids: TBid[],
+	request: TReq,
 	pluginTimeout: number | undefined,
 	demandName: string,
 	requestId: string,
-): Promise<{ bids: Bid[]; errors: DemandError[] }> {
+): Promise<{ bids: TBid[]; errors: DemandError[] }> {
 	const signal = makeSignal(pluginTimeout)
-	const { value, errors } = await runPluginsSequential(
+	const { value, errors } = await runPluginsSequential<TBid[]>(
 		plugins,
 		(p) => {
-			const hook = (p as DemandPlugin).onResponse
+			const hook = (p as DemandPlugin<TReq, TBid>).onResponse
 			if (!hook) return undefined
-			return (bids: Bid[], signal: AbortSignal) => hook(bids, signal, request)
+			return (bids: TBid[], signal: AbortSignal) => hook(bids, signal, request)
 		},
 		bids,
 		signal,
@@ -103,20 +111,23 @@ export async function runDemandResponsePlugins(
 	return { bids: value, errors }
 }
 
-export async function runGlobalResponsePlugins(
-	plugins: readonly Plugin[],
-	bids: Bid[],
+export async function runGlobalResponsePlugins<
+	TReq extends { id: string },
+	TBid,
+>(
+	plugins: readonly Plugin<TReq, TBid>[],
+	bids: TBid[],
 	pipelineErrors: readonly DemandError[],
 	pluginTimeout: number | undefined,
 	requestId: string,
-): Promise<{ bids: Bid[]; errors: DemandError[] }> {
+): Promise<{ bids: TBid[]; errors: DemandError[] }> {
 	const signal = makeSignal(pluginTimeout)
-	const { value, errors } = await runPluginsSequential(
+	const { value, errors } = await runPluginsSequential<TBid[]>(
 		plugins,
 		(p) => {
-			const hook = (p as Plugin).onResponse
+			const hook = (p as Plugin<TReq, TBid>).onResponse
 			if (!hook) return undefined
-			return (bids: Bid[], signal: AbortSignal) =>
+			return (bids: TBid[], signal: AbortSignal) =>
 				hook(bids, pipelineErrors, signal)
 		},
 		bids,

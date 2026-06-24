@@ -1,80 +1,33 @@
+import type {
+	AdSlots as CoreAdSlots,
+	AuctionStrategy as CoreAuctionStrategy,
+	BidResult as CoreBidResult,
+	DemandAdapter as CoreDemandAdapter,
+	DemandHandle as CoreDemandHandle,
+	DemandPlugin as CoreDemandPlugin,
+	Plugin as CorePlugin,
+} from "@trawl/core"
 import type { Placement } from "iab-adcom/placement"
 import type { Bid, Item, Request } from "iab-openrtb/v30"
 
 export type { Bid, Item, Request, Placement }
+export type {
+	BidOptions,
+	DemandError,
+	DemandExtensions,
+	TrawlBidExt,
+} from "@trawl/core"
 
-export interface TrawlBidExt {
-	demandName: string
-	fetchedAt: number
-}
-
-export interface DemandError {
-	requestId: string
-	demandName: string
-	type: "timeout" | "network" | "parse" | "invalid" | "unknown"
-	message: string
-}
-
-export interface BidResult {
-	requestId: string
-	bids: Map<string, Bid[]>
-	errors: DemandError[]
-}
-
-export interface Plugin {
-	name: string
-	onRequest?: (
-		request: Request,
-		signal: AbortSignal,
-	) => Request | Promise<Request>
-	onResponse?: (
-		bids: Bid[],
-		errors: readonly DemandError[],
-		signal: AbortSignal,
-	) => Bid[] | Promise<Bid[]>
-}
-
-export interface DemandPlugin {
-	name: string
-	onRequest?: (
-		request: Request,
-		signal: AbortSignal,
-	) => Request | Promise<Request>
-	// [Seam]: response hooks receive the demand-specific request (after
-	// onRequest plugins) so they can read request context — e.g. the sync
-	// plugin reads user.consent — instead of relying on hidden global state.
-	onResponse?: (
-		bids: Bid[],
-		signal: AbortSignal,
-		request: Request,
-	) => Bid[] | Promise<Bid[]>
-}
-
-export interface DemandExtensions {
-	request?: Record<string, unknown>
-	site?: Record<string, unknown>
-	user?: Record<string, unknown>
-	device?: Record<string, unknown>
-	regs?: Record<string, unknown>
-}
-
-export interface DemandAdapter {
-	name: string
-	endpoint: string | ((req: Request) => string)
-	extensions?: () => DemandExtensions
-	impExt?: (item: Readonly<Item>) => Record<string, unknown> | null
-	fetchOptions?: {
-		headers?:
-			| Record<string, string>
-			| ((req: Request) => Record<string, string>)
-		contentType?: string
-		transform?: (body: string) => string
-	}
-}
-
-export interface DemandHandle {
-	with: (plugin: DemandPlugin) => DemandHandle
-}
+// OpenRTB 3.0 instantiations of the version-agnostic core contracts. Binding
+// the v3.0 Request/Bid/Item here keeps the public surface identical to the
+// pre-core API and makes a v2.6 plugin structurally unassignable to a v3.0 slot.
+export type Plugin = CorePlugin<Request, Bid>
+export type DemandPlugin = CoreDemandPlugin<Request, Bid>
+export type DemandAdapter = CoreDemandAdapter<Request, Item>
+export type DemandHandle = CoreDemandHandle<Request, Bid>
+export type BidResult = CoreBidResult<Bid>
+export type AuctionStrategy = CoreAuctionStrategy<Bid>
+export type AdSlots = CoreAdSlots<Request, Bid, Item>
 
 export interface AdSlotsOptions {
 	clone?: (req: Request) => Request
@@ -85,17 +38,4 @@ export interface AdSlotsOptions {
 		domainspec?: string
 		domainver?: string
 	}
-}
-
-export interface BidOptions {
-	timeout?: number
-	pluginTimeout?: number
-}
-
-export type AuctionStrategy = (bids: Bid[]) => Bid | null
-
-export interface AdSlots {
-	use: (plugin: Plugin) => void
-	demand: (adapter: DemandAdapter) => DemandHandle
-	bid: (options?: BidOptions) => Promise<BidResult>
 }

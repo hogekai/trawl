@@ -1,3 +1,4 @@
+import { merge } from "@trawl/core"
 import type {
 	AudioPlacement,
 	DataAssetFormat,
@@ -8,7 +9,6 @@ import type {
 	VideoPlacement,
 } from "iab-adcom/placement"
 import type { Item } from "iab-openrtb/v30"
-import { merge } from "./merge.js"
 
 type PartialPlacement = Partial<Placement>
 

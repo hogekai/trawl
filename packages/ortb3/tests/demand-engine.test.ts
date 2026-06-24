@@ -1,6 +1,7 @@
-import type { Item, Request } from "iab-openrtb/v30"
+import { buildDemandRequest } from "@trawl/core"
+import type { Request } from "iab-openrtb/v30"
 import { describe, expect, it, vi } from "vitest"
-import { buildDemandRequest } from "../src/demand-engine.js"
+import { ortb3Profile } from "../src/profile.js"
 import type { DemandAdapter } from "../src/types.js"
 
 function makeReq(overrides?: Partial<Request>): Request {
@@ -34,7 +35,7 @@ describe("buildDemandRequest", () => {
 					return { x: 1 }
 				},
 			})
-			const result = buildDemandRequest(makeReq(), adapter)
+			const result = buildDemandRequest(makeReq(), adapter, ortb3Profile())
 			if (!result.ok || "skipped" in result) throw new Error("unexpected")
 			expect(result.ok).toBe(true)
 		})
@@ -50,7 +51,7 @@ describe("buildDemandRequest", () => {
 					return {}
 				},
 			})
-			buildDemandRequest(req, adapter)
+			buildDemandRequest(req, adapter, ortb3Profile())
 		})
 	})
 
@@ -59,7 +60,7 @@ describe("buildDemandRequest", () => {
 			const adapter = makeAdapter({
 				extensions: () => ({ request: { foo: "bar" } }),
 			})
-			const result = buildDemandRequest(makeReq(), adapter)
+			const result = buildDemandRequest(makeReq(), adapter, ortb3Profile())
 			if (!result.ok || "skipped" in result) throw new Error("unexpected")
 			expect(result.value.request.ext).toEqual({ foo: "bar" })
 		})
@@ -68,7 +69,7 @@ describe("buildDemandRequest", () => {
 			const adapter = makeAdapter({
 				extensions: () => ({ site: { siteKey: 1 } }),
 			})
-			const result = buildDemandRequest(makeReq(), adapter)
+			const result = buildDemandRequest(makeReq(), adapter, ortb3Profile())
 			if (!result.ok || "skipped" in result) throw new Error("unexpected")
 			expect(result.value.request.context?.site?.ext).toEqual({ siteKey: 1 })
 		})
@@ -82,7 +83,7 @@ describe("buildDemandRequest", () => {
 					regs: { r: 4 },
 				}),
 			})
-			const result = buildDemandRequest(makeReq(), adapter)
+			const result = buildDemandRequest(makeReq(), adapter, ortb3Profile())
 			if (!result.ok || "skipped" in result) throw new Error("unexpected")
 			const ctx = result.value.request.context
 			expect(ctx?.site?.ext).toEqual({ s: 1 })
@@ -98,7 +99,7 @@ describe("buildDemandRequest", () => {
 			const adapter = makeAdapter({
 				extensions: () => ({ request: { conflict: "new", added: true } }),
 			})
-			const result = buildDemandRequest(template, adapter)
+			const result = buildDemandRequest(template, adapter, ortb3Profile())
 			if (!result.ok || "skipped" in result) throw new Error("unexpected")
 			expect(result.value.request.ext).toEqual({
 				existing: "keep",
@@ -112,7 +113,7 @@ describe("buildDemandRequest", () => {
 			const adapter = makeAdapter({
 				extensions: () => ({ site: { foo: 1 } }),
 			})
-			const result = buildDemandRequest(template, adapter)
+			const result = buildDemandRequest(template, adapter, ortb3Profile())
 			if (!result.ok || "skipped" in result) throw new Error("unexpected")
 			expect(result.value.request.context?.site?.ext).toEqual({ foo: 1 })
 		})
@@ -122,7 +123,7 @@ describe("buildDemandRequest", () => {
 			const adapter = makeAdapter({
 				extensions: () => ({ site: { bar: 2 } }),
 			})
-			const result = buildDemandRequest(template, adapter)
+			const result = buildDemandRequest(template, adapter, ortb3Profile())
 			if (!result.ok || "skipped" in result) throw new Error("unexpected")
 			expect(result.value.request.context?.site?.ext).toEqual({ bar: 2 })
 			// user should still exist
@@ -135,7 +136,7 @@ describe("buildDemandRequest", () => {
 					throw new Error("ext boom")
 				},
 			})
-			const result = buildDemandRequest(makeReq(), adapter)
+			const result = buildDemandRequest(makeReq(), adapter, ortb3Profile())
 			expect(result.ok).toBe(false)
 			if (result.ok) throw new Error("unexpected")
 			expect(result.error.type).toBe("invalid")
@@ -149,7 +150,7 @@ describe("buildDemandRequest", () => {
 			const adapter = makeAdapter({
 				impExt: () => ({ bidfloor: 0.5 }),
 			})
-			const result = buildDemandRequest(makeReq(), adapter)
+			const result = buildDemandRequest(makeReq(), adapter, ortb3Profile())
 			if (!result.ok || "skipped" in result) throw new Error("unexpected")
 			for (const item of result.value.request.item) {
 				expect(item.ext).toEqual({ bidfloor: 0.5 })
@@ -160,7 +161,7 @@ describe("buildDemandRequest", () => {
 			const adapter = makeAdapter({
 				impExt: (item) => (item.id === "imp-1" ? { x: 1 } : null),
 			})
-			const result = buildDemandRequest(makeReq(), adapter)
+			const result = buildDemandRequest(makeReq(), adapter, ortb3Profile())
 			if (!result.ok || "skipped" in result) throw new Error("unexpected")
 			expect(result.value.request.item).toHaveLength(1)
 			expect(result.value.request.item[0]?.id).toBe("imp-1")
@@ -171,7 +172,7 @@ describe("buildDemandRequest", () => {
 			const adapter = makeAdapter({
 				impExt: () => null,
 			})
-			const result = buildDemandRequest(makeReq(), adapter)
+			const result = buildDemandRequest(makeReq(), adapter, ortb3Profile())
 			expect(result.ok).toBe(true)
 			if (!result.ok) throw new Error("unexpected")
 			expect("skipped" in result).toBe(true)
@@ -180,7 +181,11 @@ describe("buildDemandRequest", () => {
 		})
 
 		it("includes all items when adapter has no impExt", () => {
-			const result = buildDemandRequest(makeReq(), makeAdapter())
+			const result = buildDemandRequest(
+				makeReq(),
+				makeAdapter(),
+				ortb3Profile(),
+			)
 			if (!result.ok || "skipped" in result) throw new Error("unexpected")
 			expect(result.value.request.item).toHaveLength(2)
 		})
@@ -192,7 +197,7 @@ describe("buildDemandRequest", () => {
 			const adapter = makeAdapter({
 				impExt: () => ({ added: true }),
 			})
-			const result = buildDemandRequest(template, adapter)
+			const result = buildDemandRequest(template, adapter, ortb3Profile())
 			if (!result.ok || "skipped" in result) throw new Error("unexpected")
 			expect(result.value.request.item[0]?.ext).toEqual({
 				existing: true,
@@ -206,7 +211,7 @@ describe("buildDemandRequest", () => {
 					throw new Error("impExt boom")
 				},
 			})
-			const result = buildDemandRequest(makeReq(), adapter)
+			const result = buildDemandRequest(makeReq(), adapter, ortb3Profile())
 			expect(result.ok).toBe(false)
 			if (result.ok) throw new Error("unexpected")
 			expect(result.error.type).toBe("invalid")
@@ -216,7 +221,11 @@ describe("buildDemandRequest", () => {
 
 	describe("endpoint", () => {
 		it("uses string endpoint directly", () => {
-			const result = buildDemandRequest(makeReq(), makeAdapter())
+			const result = buildDemandRequest(
+				makeReq(),
+				makeAdapter(),
+				ortb3Profile(),
+			)
 			if (!result.ok || "skipped" in result) throw new Error("unexpected")
 			expect(result.value.endpoint).toBe("https://example.com/bid")
 		})
@@ -224,7 +233,7 @@ describe("buildDemandRequest", () => {
 		it("calls function endpoint with the built request", () => {
 			const endpointFn = vi.fn(() => "https://dynamic.com/bid")
 			const adapter = makeAdapter({ endpoint: endpointFn })
-			const result = buildDemandRequest(makeReq(), adapter)
+			const result = buildDemandRequest(makeReq(), adapter, ortb3Profile())
 			if (!result.ok || "skipped" in result) throw new Error("unexpected")
 			expect(result.value.endpoint).toBe("https://dynamic.com/bid")
 			expect(endpointFn).toHaveBeenCalledWith(result.value.request)
@@ -238,7 +247,7 @@ describe("buildDemandRequest", () => {
 					headers: { Authorization: "Bearer token" },
 				},
 			})
-			const result = buildDemandRequest(makeReq(), adapter)
+			const result = buildDemandRequest(makeReq(), adapter, ortb3Profile())
 			if (!result.ok || "skipped" in result) throw new Error("unexpected")
 			expect(result.value.requestInit.headers.Authorization).toBe(
 				"Bearer token",
@@ -250,14 +259,18 @@ describe("buildDemandRequest", () => {
 			const adapter = makeAdapter({
 				fetchOptions: { headers: headersFn },
 			})
-			const result = buildDemandRequest(makeReq(), adapter)
+			const result = buildDemandRequest(makeReq(), adapter, ortb3Profile())
 			if (!result.ok || "skipped" in result) throw new Error("unexpected")
 			expect(result.value.requestInit.headers["X-Custom"]).toBe("val")
 			expect(headersFn).toHaveBeenCalledWith(result.value.request)
 		})
 
 		it("sets default Content-Type to application/json", () => {
-			const result = buildDemandRequest(makeReq(), makeAdapter())
+			const result = buildDemandRequest(
+				makeReq(),
+				makeAdapter(),
+				ortb3Profile(),
+			)
 			if (!result.ok || "skipped" in result) throw new Error("unexpected")
 			expect(result.value.requestInit.headers["Content-Type"]).toBe(
 				"application/json",
@@ -268,7 +281,7 @@ describe("buildDemandRequest", () => {
 			const adapter = makeAdapter({
 				fetchOptions: { contentType: "application/octet-stream" },
 			})
-			const result = buildDemandRequest(makeReq(), adapter)
+			const result = buildDemandRequest(makeReq(), adapter, ortb3Profile())
 			if (!result.ok || "skipped" in result) throw new Error("unexpected")
 			expect(result.value.requestInit.headers["Content-Type"]).toBe(
 				"application/octet-stream",
@@ -281,20 +294,28 @@ describe("buildDemandRequest", () => {
 					transform: (body) => body.replace(/"req-1"/, '"transformed"'),
 				},
 			})
-			const result = buildDemandRequest(makeReq(), adapter)
+			const result = buildDemandRequest(makeReq(), adapter, ortb3Profile())
 			if (!result.ok || "skipped" in result) throw new Error("unexpected")
 			expect(result.value.requestInit.body).toContain('"transformed"')
 			expect(result.value.requestInit.body).not.toContain('"req-1"')
 		})
 
 		it("sets method to POST", () => {
-			const result = buildDemandRequest(makeReq(), makeAdapter())
+			const result = buildDemandRequest(
+				makeReq(),
+				makeAdapter(),
+				ortb3Profile(),
+			)
 			if (!result.ok || "skipped" in result) throw new Error("unexpected")
 			expect(result.value.requestInit.method).toBe("POST")
 		})
 
 		it("body is JSON stringified Openrtb envelope wrapping request", () => {
-			const result = buildDemandRequest(makeReq(), makeAdapter())
+			const result = buildDemandRequest(
+				makeReq(),
+				makeAdapter(),
+				ortb3Profile(),
+			)
 			if (!result.ok || "skipped" in result) throw new Error("unexpected")
 			const parsed = JSON.parse(result.value.requestInit.body)
 			expect(parsed.ver).toBe("3.0")

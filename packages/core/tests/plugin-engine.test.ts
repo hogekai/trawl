@@ -1,4 +1,3 @@
-import type { Bid, Request } from "iab-openrtb/v30"
 import { describe, expect, it, vi } from "vitest"
 import {
 	runDemandRequestPlugins,
@@ -6,14 +5,28 @@ import {
 	runGlobalRequestPlugins,
 	runGlobalResponsePlugins,
 } from "../src/plugin-engine.js"
-import type { DemandPlugin, Plugin } from "../src/types.js"
+import type {
+	DemandPlugin as CoreDemandPlugin,
+	Plugin as CorePlugin,
+} from "../src/types.js"
+
+// Minimal version-agnostic carriers — the engine only reads `request.id` and
+// treats bids opaquely, so these stand in for any OpenRTB version.
+interface Request {
+	id: string
+	ext?: Record<string, unknown>
+}
+interface Bid {
+	id?: string
+	item?: string
+	price: number
+	ext?: Record<string, unknown>
+}
+type Plugin = CorePlugin<Request, Bid>
+type DemandPlugin = CoreDemandPlugin<Request, Bid>
 
 function makeReq(overrides?: Partial<Request>): Request {
-	return {
-		id: "req-1",
-		item: [{ id: "imp-1", spec: {} }],
-		...overrides,
-	}
+	return { id: "req-1", ...overrides }
 }
 
 function makeBid(overrides?: Partial<Bid>): Bid {

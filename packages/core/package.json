@@ -1,15 +1,15 @@
 {
-	"name": "@trawl/ortb3",
+	"name": "@trawl/core",
 	"version": "0.1.0",
 	"type": "module",
-	"description": "OpenRTB 3.0 bid collection library",
+	"description": "Version-agnostic bid-collection pipeline for trawl",
 	"license": "MIT",
 	"repository": {
 		"type": "git",
 		"url": "https://github.com/hogekai/trawl.git",
-		"directory": "packages/ortb3"
+		"directory": "packages/core"
 	},
-	"keywords": ["openrtb", "bidding", "programmatic", "advertising", "ssp"],
+	"keywords": ["openrtb", "bidding", "programmatic", "advertising"],
 	"engines": {
 		"node": ">=18"
 	},
@@ -24,11 +24,6 @@
 		"build": "tsup",
 		"test": "vitest run",
 		"typecheck": "tsc --noEmit"
-	},
-	"dependencies": {
-		"@trawl/core": "workspace:*",
-		"iab-openrtb": "^2.1.0",
-		"iab-adcom": "^2.0.1"
 	},
 	"devDependencies": {
 		"typescript": "^5.7.0",
