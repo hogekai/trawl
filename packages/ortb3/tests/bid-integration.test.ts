@@ -84,7 +84,9 @@ describe("bid() integration", () => {
 			} as Response
 		}) as typeof globalThis.fetch
 
-		const ads = createAdSlots([item("imp-1", banner([[300, 250]]))], { fetcher })
+		const ads = createAdSlots([item("imp-1", banner([[300, 250]]))], {
+			fetcher,
+		})
 		ads.demand({ name: "fast", endpoint: "https://fast.com/bid" })
 		ads.demand({ name: "slow", endpoint: "https://slow.com/bid" })
 		const result = await ads.bid({ timeout: 50 })
@@ -130,7 +132,9 @@ describe("bid() integration", () => {
 			} as Response
 		}) as typeof globalThis.fetch
 
-		const ads = createAdSlots([item("imp-1", banner([[300, 250]]))], { fetcher })
+		const ads = createAdSlots([item("imp-1", banner([[300, 250]]))], {
+			fetcher,
+		})
 		ads.use({
 			name: "global-ext",
 			onRequest: (req) => {
@@ -166,7 +170,9 @@ describe("bid() integration", () => {
 			} as Response
 		}) as typeof globalThis.fetch
 
-		const ads = createAdSlots([item("imp-1", banner([[300, 250]]))], { fetcher })
+		const ads = createAdSlots([item("imp-1", banner([[300, 250]]))], {
+			fetcher,
+		})
 		ads.demand({ name: "dsp-a", endpoint: "https://dsp-a.com/bid" }).with({
 			name: "a-plugin",
 			onRequest: (req) => {
@@ -177,8 +183,14 @@ describe("bid() integration", () => {
 		ads.demand({ name: "dsp-b", endpoint: "https://dsp-b.com/bid" })
 		await ads.bid()
 
-		const envelopeA = bodies.get("https://dsp-a.com/bid") as Record<string, unknown>
-		const envelopeB = bodies.get("https://dsp-b.com/bid") as Record<string, unknown>
+		const envelopeA = bodies.get("https://dsp-a.com/bid") as Record<
+			string,
+			unknown
+		>
+		const envelopeB = bodies.get("https://dsp-b.com/bid") as Record<
+			string,
+			unknown
+		>
 		const bodyA = envelopeA.request as Record<string, unknown>
 		const bodyB = envelopeB.request as Record<string, unknown>
 		expect(bodyA.ext).toEqual({ demandSpecific: true })
@@ -367,7 +379,9 @@ describe("bid() integration", () => {
 			} as Response
 		}) as typeof globalThis.fetch
 
-		const ads = createAdSlots([item("imp-1", banner([[300, 250]]))], { fetcher })
+		const ads = createAdSlots([item("imp-1", banner([[300, 250]]))], {
+			fetcher,
+		})
 		ads.demand({ name: "dsp-a", endpoint: "https://dsp-a.com/bid" })
 		await ads.bid()
 

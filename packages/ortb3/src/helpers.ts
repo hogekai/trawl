@@ -1,4 +1,5 @@
 import type {
+	AudioPlacement,
 	DataAssetFormat,
 	DisplayPlacement,
 	ImageAssetFormat,
@@ -16,6 +17,10 @@ type BannerOptions = Omit<Partial<DisplayPlacement>, "displayfmt" | "nativefmt">
 type VideoParams = {
 	mimes: string[]
 } & Omit<Partial<VideoPlacement>, "mime">
+
+type AudioParams = {
+	mimes: string[]
+} & Omit<Partial<AudioPlacement>, "mime">
 
 interface NativeAsset {
 	req?: 0 | 1
@@ -52,6 +57,13 @@ export function video(params: VideoParams): PartialPlacement {
 	const { mimes, ...rest } = params
 	return {
 		video: { mime: mimes, ...rest },
+	}
+}
+
+export function audio(params: AudioParams): PartialPlacement {
+	const { mimes, ...rest } = params
+	return {
+		audio: { mime: mimes, ...rest },
 	}
 }
 

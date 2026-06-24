@@ -15,7 +15,7 @@ import { createAdSlots, item, banner } from "@trawl/ortb3"
 import { consent, sync, topics } from "@trawl/ortb3-web"
 
 const slots = createAdSlots([
-  item("imp-1", banner([300, 250])),
+  item("imp-1", banner([[300, 250]])),
 ])
 
 slots.use(consent(() => window.__tcfapi("getTCData")))
@@ -31,11 +31,11 @@ slots.demand({
 
 ### `consent(getTCData): Plugin`
 
-Global plugin that sets TCF consent on the request. Adds `regs.ext.gdpr` and `user.ext.consent`.
+Global plugin that sets TCF consent on the request. Sets `context.regs.gdpr` (`1`/`0`) and `context.user.consent` (the TC string).
 
 ### `sync(type, buildUrl): DemandPlugin`
 
-Demand plugin that fires a cookie sync pixel (`"image"`) or iframe (`"iframe"`) on response.
+Demand plugin that fires a cookie sync pixel (`"image"`) or iframe (`"iframe"`) on response. `buildUrl` receives the TC string from `context.user.consent` (set by `consent()`), or `undefined` when none is present.
 
 ### `topics(): Plugin`
 

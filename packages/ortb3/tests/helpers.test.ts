@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest"
-import { banner, item, native, video } from "../src/index.js"
+import { audio, banner, item, native, video } from "../src/index.js"
 
 describe("item()", () => {
 	it("creates an Item with id and spec", () => {
@@ -10,7 +10,11 @@ describe("item()", () => {
 	})
 
 	it("merges multiple placements for multi-format", () => {
-		const i = item("multi", banner([[300, 250]]), video({ mimes: ["video/mp4"] }))
+		const i = item(
+			"multi",
+			banner([[300, 250]]),
+			video({ mimes: ["video/mp4"] }),
+		)
 		expect(i.spec.display?.displayfmt).toEqual([{ w: 300, h: 250 }])
 		expect(i.spec.video?.mime).toEqual(["video/mp4"])
 	})
@@ -35,7 +39,11 @@ describe("banner()", () => {
 	})
 
 	it("creates displayfmt with multiple sizes", () => {
-		const result = banner([[728, 90], [970, 250], [320, 50]])
+		const result = banner([
+			[728, 90],
+			[970, 250],
+			[320, 50],
+		])
 		expect(result.display?.displayfmt).toHaveLength(3)
 		expect(result.display?.displayfmt).toEqual([
 			{ w: 728, h: 90 },
@@ -69,12 +77,23 @@ describe("video()", () => {
 	})
 })
 
+describe("audio()", () => {
+	it("maps mimes to mime field", () => {
+		const result = audio({ mimes: ["audio/mp4", "audio/mpeg"] })
+		expect(result.audio?.mime).toEqual(["audio/mp4", "audio/mpeg"])
+	})
+
+	it("passes through AudioPlacement fields", () => {
+		const result = audio({ mimes: ["audio/mp4"], maxdur: 30, mindur: 5 })
+		expect(result.audio?.mime).toEqual(["audio/mp4"])
+		expect(result.audio?.maxdur).toBe(30)
+		expect(result.audio?.mindur).toBe(5)
+	})
+})
+
 describe("native()", () => {
 	it("creates assets for title and image", () => {
-		const result = native([
-			{ title: { len: 90 } },
-			{ img: { type: 3 } },
-		])
+		const result = native([{ title: { len: 90 } }, { img: { type: 3 } }])
 		const assets = result.display?.nativefmt?.asset
 		expect(assets).toHaveLength(2)
 		expect(assets?.[0]).toEqual({ id: 0, title: { len: 90 } })

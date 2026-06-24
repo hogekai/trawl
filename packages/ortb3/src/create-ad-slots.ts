@@ -27,6 +27,7 @@ interface DemandEntry {
 interface DemandResult {
 	demandName: string
 	bids: Bid[]
+	request: Request
 	plugins: readonly DemandPlugin[]
 	errors: DemandError[]
 }
@@ -111,13 +112,29 @@ export function createAdSlots(
 				errors.push(...pluginResult.errors)
 
 				// c) Build the demand request
-				const buildResult = buildDemandRequest(pluginResult.request, adapter, options?.openrtb)
+				const buildResult = buildDemandRequest(
+					pluginResult.request,
+					adapter,
+					options?.openrtb,
+				)
 				if (!buildResult.ok) {
 					errors.push(buildResult.error)
-					return { demandName, bids: [], plugins: demandPlugins, errors }
+					return {
+						demandName,
+						bids: [],
+						request: pluginResult.request,
+						plugins: demandPlugins,
+						errors,
+					}
 				}
 				if ("skipped" in buildResult) {
-					return { demandName, bids: [], plugins: demandPlugins, errors }
+					return {
+						demandName,
+						bids: [],
+						request: pluginResult.request,
+						plugins: demandPlugins,
+						errors,
+					}
 				}
 
 				// d) Fetch
@@ -140,19 +157,32 @@ export function createAdSlots(
 						type,
 						message: e instanceof Error ? e.message : String(e),
 					})
-					return { demandName, bids: [], plugins: demandPlugins, errors }
+					return {
+						demandName,
+						bids: [],
+						request: buildResult.value.request,
+						plugins: demandPlugins,
+						errors,
+					}
 				}
 
 				// e) Parse response
 				const parseResult = await parseResponse(response, demandName, requestId)
 				if (!parseResult.ok) {
 					errors.push(parseResult.error)
-					return { demandName, bids: [], plugins: demandPlugins, errors }
+					return {
+						demandName,
+						bids: [],
+						request: buildResult.value.request,
+						plugins: demandPlugins,
+						errors,
+					}
 				}
 
 				return {
 					demandName,
 					bids: parseResult.bids,
+					request: buildResult.value.request,
 					plugins: demandPlugins,
 					errors,
 				}
@@ -177,12 +207,13 @@ export function createAdSlots(
 			}
 		}
 
-		// Phase 4: Demand response plugins (per-demand, in parallel)
+		// Phase 3: Demand response plugins (per-demand, in parallel)
 		const responseResults = await Promise.allSettled(
 			successfulDemands.map(async (dr) => {
 				const { bids, errors } = await runDemandResponsePlugins(
 					dr.plugins,
 					dr.bids,
+					dr.request,
 					pluginTimeout,
 					dr.demandName,
 					requestId,
@@ -205,7 +236,7 @@ export function createAdSlots(
 			}
 		}
 
-		// Phase 5: Global response plugins
+		// Phase 4: Global response plugins
 		const globalRespResult = await runGlobalResponsePlugins(
 			globalPlugins,
 			allBidsFlat,

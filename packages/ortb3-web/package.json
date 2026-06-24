@@ -9,7 +9,14 @@
 		"url": "https://github.com/hogekai/trawl.git",
 		"directory": "packages/ortb3-web"
 	},
-	"keywords": ["openrtb", "programmatic", "advertising", "consent", "tcf", "topics"],
+	"keywords": [
+		"openrtb",
+		"programmatic",
+		"advertising",
+		"consent",
+		"tcf",
+		"topics"
+	],
 	"engines": {
 		"node": ">=18"
 	},

@@ -62,6 +62,14 @@ Creates a video Placement. `params.mimes` is required. `VideoPlacement` fields (
 video({ mimes: ["video/mp4"], maxdur: 30 })
 ```
 
+### `audio(params): Placement`
+
+Creates an audio Placement. `params.mimes` is required. `AudioPlacement` fields (`mindur`, `maxdur`, `delivery`, etc.) can be passed directly.
+
+```typescript
+audio({ mimes: ["audio/mp4"], maxdur: 30 })
+```
+
 ### `native(assets): Placement`
 
 Creates a native Placement. `assets` is `NativeAsset[]`. Each asset can specify `title`, `img`, `data`, `video`, and the `req` flag. `id` is auto-assigned.
@@ -91,19 +99,29 @@ Strategy that prioritizes Bids with a Deal, falling back to highest price when e
 Two types: global Plugins (shared across all demands) and DemandPlugins (demand-specific).
 
 ```typescript
+// Global plugin (shared across all demands)
 interface Plugin {
   name: string
   onRequest?: (request: Request, signal: AbortSignal) => Request | Promise<Request>
-  onResponse?: (bids: Bid[], signal: AbortSignal) => Bid[] | Promise<Bid[]>
+  onResponse?: (bids: Bid[], errors: readonly DemandError[], signal: AbortSignal) => Bid[] | Promise<Bid[]>
+}
+
+// Demand-specific plugin
+interface DemandPlugin {
+  name: string
+  onRequest?: (request: Request, signal: AbortSignal) => Request | Promise<Request>
+  onResponse?: (bids: Bid[], signal: AbortSignal, request: Request) => Bid[] | Promise<Bid[]>
 }
 ```
+
+A global `onResponse` additionally receives the pipeline `errors`. A demand `onResponse` receives the demand-specific `request` (after its `onRequest` plugins ran), so it can read request context such as `context.user.consent`.
 
 ```typescript
 // Global
 slots.use({ name: "my-plugin", onRequest(req, signal) { return req } })
 
 // Demand-specific
-slots.demand(adapter).with({ name: "dsp-plugin", onResponse(bids, signal) { return bids } })
+slots.demand(adapter).with({ name: "dsp-plugin", onResponse(bids, signal, req) { return bids } })
 ```
 
 ## DemandAdapter

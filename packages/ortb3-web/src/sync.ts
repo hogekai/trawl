@@ -1,5 +1,5 @@
-import type { Bid } from "iab-openrtb/v30"
 import type { DemandPlugin } from "@trawl/ortb3"
+import type { Bid, Request } from "iab-openrtb/v30"
 
 export function sync(
 	type: "image" | "iframe",
@@ -7,8 +7,11 @@ export function sync(
 ): DemandPlugin {
 	return {
 		name: "sync",
-		onResponse(bids: Bid[]): Bid[] {
-			const url = buildUrl()
+		onResponse(bids: Bid[], _signal: AbortSignal, request: Request): Bid[] {
+			// [Seam]: read the TCF consent string the consent() plugin wrote
+			// onto the request, so the sync URL can carry it downstream.
+			const consent = request.context?.user?.consent
+			const url = buildUrl(consent)
 			if (type === "image") {
 				new Image().src = url
 			} else {

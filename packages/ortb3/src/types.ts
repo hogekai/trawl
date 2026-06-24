@@ -11,7 +11,7 @@ export interface TrawlBidExt {
 export interface DemandError {
 	requestId: string
 	demandName: string
-	type: "timeout" | "network" | "parse" | "validation" | "invalid" | "unknown"
+	type: "timeout" | "network" | "parse" | "invalid" | "unknown"
 	message: string
 }
 
@@ -27,7 +27,11 @@ export interface Plugin {
 		request: Request,
 		signal: AbortSignal,
 	) => Request | Promise<Request>
-	onResponse?: (bids: Bid[], errors: readonly DemandError[], signal: AbortSignal) => Bid[] | Promise<Bid[]>
+	onResponse?: (
+		bids: Bid[],
+		errors: readonly DemandError[],
+		signal: AbortSignal,
+	) => Bid[] | Promise<Bid[]>
 }
 
 export interface DemandPlugin {
@@ -36,7 +40,14 @@ export interface DemandPlugin {
 		request: Request,
 		signal: AbortSignal,
 	) => Request | Promise<Request>
-	onResponse?: (bids: Bid[], signal: AbortSignal) => Bid[] | Promise<Bid[]>
+	// [Seam]: response hooks receive the demand-specific request (after
+	// onRequest plugins) so they can read request context — e.g. the sync
+	// plugin reads user.consent — instead of relying on hidden global state.
+	onResponse?: (
+		bids: Bid[],
+		signal: AbortSignal,
+		request: Request,
+	) => Bid[] | Promise<Bid[]>
 }
 
 export interface DemandExtensions {

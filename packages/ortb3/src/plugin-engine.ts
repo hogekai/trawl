@@ -83,6 +83,7 @@ export async function runDemandRequestPlugins(
 export async function runDemandResponsePlugins(
 	plugins: readonly DemandPlugin[],
 	bids: Bid[],
+	request: Request,
 	pluginTimeout: number | undefined,
 	demandName: string,
 	requestId: string,
@@ -90,7 +91,11 @@ export async function runDemandResponsePlugins(
 	const signal = makeSignal(pluginTimeout)
 	const { value, errors } = await runPluginsSequential(
 		plugins,
-		(p) => (p as DemandPlugin).onResponse,
+		(p) => {
+			const hook = (p as DemandPlugin).onResponse
+			if (!hook) return undefined
+			return (bids: Bid[], signal: AbortSignal) => hook(bids, signal, request)
+		},
 		bids,
 		signal,
 		(_, err) => formatError(requestId, demandName, err),

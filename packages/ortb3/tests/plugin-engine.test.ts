@@ -338,6 +338,7 @@ describe("runDemandResponsePlugins", () => {
 		const { bids, errors } = await runDemandResponsePlugins(
 			plugins,
 			[makeBid({ price: 0.5 })],
+			makeReq(),
 			undefined,
 			"demand-a",
 			"req-1",
@@ -360,6 +361,7 @@ describe("runDemandResponsePlugins", () => {
 		const { errors } = await runDemandResponsePlugins(
 			plugins,
 			[makeBid()],
+			makeReq(),
 			undefined,
 			"demand-b",
 			"req-42",
@@ -388,6 +390,7 @@ describe("runDemandResponsePlugins", () => {
 		const { bids, errors } = await runDemandResponsePlugins(
 			plugins,
 			[],
+			makeReq(),
 			undefined,
 			"demand-a",
 			"req-1",
@@ -402,6 +405,7 @@ describe("runDemandResponsePlugins", () => {
 		const { bids } = await runDemandResponsePlugins(
 			plugins,
 			[],
+			makeReq(),
 			undefined,
 			"demand-a",
 			"req-1",
@@ -414,6 +418,7 @@ describe("runDemandResponsePlugins", () => {
 		const { bids } = await runDemandResponsePlugins(
 			[],
 			input,
+			makeReq(),
 			undefined,
 			"demand-a",
 			"req-1",

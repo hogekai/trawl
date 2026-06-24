@@ -1,6 +1,14 @@
-import type { Bid } from "iab-openrtb/v30"
+import type { Bid, Request } from "iab-openrtb/v30"
 import { afterEach, describe, expect, it, vi } from "vitest"
 import { sync } from "../src/sync.js"
+
+function makeRequest(consent?: string): Request {
+	return {
+		id: "req-1",
+		item: [],
+		context: consent ? { user: { consent } } : {},
+	}
+}
 
 const originalImage = globalThis.Image
 const originalDocument = (globalThis as Record<string, unknown>).document
@@ -34,7 +42,7 @@ describe("sync", () => {
 		const bids = makeBids()
 		const signal = new AbortController().signal
 
-		const result = plugin.onResponse?.(bids, signal)
+		const result = plugin.onResponse?.(bids, signal, makeRequest())
 
 		expect(instances).toHaveLength(1)
 		expect(instances[0]?.src).toBe("https://pixel.example.com/sync")
@@ -53,7 +61,7 @@ describe("sync", () => {
 		const bids = makeBids()
 		const signal = new AbortController().signal
 
-		const result = plugin.onResponse?.(bids, signal)
+		const result = plugin.onResponse?.(bids, signal, makeRequest())
 
 		expect(iframe.src).toBe("https://sync.example.com/iframe")
 		expect(iframe.width).toBe("0")
@@ -63,7 +71,7 @@ describe("sync", () => {
 		expect(result).toBe(bids)
 	})
 
-	it("passes consent string from buildUrl callback", () => {
+	it("passes the request's consent string to the buildUrl callback", () => {
 		const instances: { src: string }[] = []
 		globalThis.Image = vi.fn().mockImplementation(() => {
 			const img = { src: "" }
@@ -71,13 +79,29 @@ describe("sync", () => {
 			return img
 		}) as unknown as typeof Image
 
-		const buildUrl = vi
-			.fn()
-			.mockReturnValue("https://pixel.example.com/sync?gdpr=1")
+		const buildUrl = vi.fn(
+			(consent?: string) => `https://pixel.example.com/sync?consent=${consent}`,
+		)
 		const plugin = sync("image", buildUrl)
-		plugin.onResponse?.(makeBids(), new AbortController().signal)
+		plugin.onResponse?.(
+			makeBids(),
+			new AbortController().signal,
+			makeRequest("CONSENT_STRING"),
+		)
 
-		expect(buildUrl).toHaveBeenCalled()
-		expect(instances[0]?.src).toBe("https://pixel.example.com/sync?gdpr=1")
+		expect(buildUrl).toHaveBeenCalledWith("CONSENT_STRING")
+		expect(instances[0]?.src).toBe(
+			"https://pixel.example.com/sync?consent=CONSENT_STRING",
+		)
+	})
+
+	it("passes undefined consent when the request carries none", () => {
+		globalThis.Image = vi.fn().mockImplementation(() => ({ src: "" }))
+
+		const buildUrl = vi.fn(() => "https://pixel.example.com/sync")
+		const plugin = sync("image", buildUrl)
+		plugin.onResponse?.(makeBids(), new AbortController().signal, makeRequest())
+
+		expect(buildUrl).toHaveBeenCalledWith(undefined)
 	})
 })
