@@ -24,6 +24,25 @@ importers:
         specifier: ^3.0.0
         version: 3.2.4
 
+  packages/ortb2:
+    dependencies:
+      '@trawl/core':
+        specifier: workspace:*
+        version: link:../core
+      iab-openrtb:
+        specifier: ^2.1.0
+        version: 2.1.0
+    devDependencies:
+      tsup:
+        specifier: ^8.0.0
+        version: 8.5.1(postcss@8.5.8)(typescript@5.9.3)
+      typescript:
+        specifier: ^5.7.0
+        version: 5.9.3
+      vitest:
+        specifier: ^3.0.0
+        version: 3.2.4
+
   packages/ortb3:
     dependencies:
       '@trawl/core':
